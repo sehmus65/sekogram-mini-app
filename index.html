@@ -45,6 +45,23 @@
         </div>
     </div>
 
+    <!-- ⚠️ YOĞUNLUK BİLGİLENDİRME MODALI -->
+    <div id="notice-modal" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl relative animate-scale">
+            <button onclick="closeNoticeModal()" class="absolute top-3 right-3 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition">✕</button>
+            <div class="text-center space-y-2 pt-2">
+                <div class="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-2xl mx-auto flex items-center justify-center text-xl">⏳</div>
+                <h3 class="font-bold text-sm text-white">Önemli Bilgilendirme</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Sistemdeki yoğunluğa bağlı olarak sipariş gönderimleri ve bakiye onayları <b class="text-cyan-400">1 ila 8 saat</b> arasında yapılmaktadır. Lütfen bu süreyi dikkate alınız.
+                </p>
+            </div>
+            <button onclick="closeNoticeModal()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold py-2.5 rounded-xl transition">
+                Anladım, Kapat
+            </button>
+        </div>
+    </div>
+
     <!-- ANA UYGULAMA İÇERİĞİ -->
     <div class="w-full max-w-md mx-auto flex flex-col flex-1 justify-between space-y-4">
         
@@ -110,7 +127,7 @@
                     <h3 class="font-bold text-sm text-cyan-300">Banka Havalesi / EFT</h3>
                     <span class="bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-0.5 rounded-md font-semibold">Anında Onay</span>
                 </div>
-                <p class="text-[11px] text-slate-400">Aşağıdaki Ziraat Bankası hesabına ödemeyi yaptıktan sonra bildirim gönderin.</p>
+                <p class="text-[11px] text-slate-400">Aşağıdaki Ziraat Bankası hesabına ödemeyi yaptıktan sonra bildirim gönderin. (Min. Yükleme: 250 TL)</p>
                 
                 <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 space-y-1 text-xs">
                     <p class="text-slate-300"><b>Banka:</b> Ziraat Bankası</p>
@@ -119,11 +136,11 @@
                 </div>
 
                 <div class="space-y-2 pt-1">
-                    <label class="text-[10px] text-slate-400 block">Yüklemek İstediğiniz Paket:</label>
+                    <label class="text-[10px] text-slate-400 block">Yüklemek İstediğiniz Paket (Tanesi ~2.3 TL):</label>
                     <select id="deposit-package" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
-                        <option value="500">50 TL = 500 Elmas</option>
-                        <option value="1200">100 TL = 1,200 Elmas (Avantajlı!)</option>
-                        <option value="3000">250 TL = 3,000 Elmas (Mega Paket!)</option>
+                        <option value="110">250 TL = 110 Elmas</option>
+                        <option value="220">500 TL = 220 Elmas (Avantajlı!)</option>
+                        <option value="440">1000 TL = 440 Elmas (Mega Paket!)</option>
                     </select>
                     <input type="text" id="deposit-txid" placeholder="Gönderen Adı Soyadı veya Açıklama" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
                     <button onclick="requestDeposit()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold py-2.5 rounded-lg transition">
@@ -187,6 +204,18 @@
             </div>
             
             <div class="space-y-4">
+                <!-- Manuel Bakiye Ekleme Alanı -->
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                    <h3 class="text-xs font-bold text-emerald-400">💎 Kullanıcıya Elmas/Bakiye Ekle</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="admin-target-user" placeholder="Kullanıcı Adı" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+                        <input type="number" id="admin-target-diamonds" placeholder="Elmas Miktarı" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <button onclick="adminAddBalanceToUser()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold py-2 rounded-lg transition">
+                        Seçilen Kullanıcıya Elmas Yükle
+                    </button>
+                </div>
+
                 <div>
                     <h3 class="text-xs font-bold text-cyan-300 mb-2">📋 Tüm Müşteri Siparişleri ve Ödeme Bildirimleri</h3>
                     <div id="admin-orders-container" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
@@ -208,10 +237,20 @@
         let authMode = 'login'; // 'login' veya 'register'
         let currentUser = localStorage.getItem('seko_current_session');
 
-        // Eğer aktif oturum varsa doğrudan içeri al
+        // Eğer aktif oturum varsa doğrudan içeri al ve duyuru modalını göster
         if (currentUser) {
             document.getElementById('auth-screen').style.display = 'none';
             initApp();
+            showNoticeModal();
+        }
+
+        function showNoticeModal() {
+            // Her oturum açılışında bir kez göstermek için kontrol edilebilir ya da direkt gösterilebilir
+            document.getElementById('notice-modal').classList.remove('hidden');
+        }
+
+        function closeNoticeModal() {
+            document.getElementById('notice-modal').classList.add('hidden');
         }
 
         function switchAuthMode(mode) {
@@ -273,6 +312,7 @@
                 setTimeout(() => {
                     authScreen.style.display = 'none';
                     initApp();
+                    showNoticeModal();
                 }, 300);
             }
         }
@@ -424,11 +464,11 @@
                 target: targetVal,
                 cost: cost,
                 date: new Date().toLocaleDateString('tr-TR') + " " + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
-                status: 'Sırada / Gönderiliyor'
+                status: 'Sırada (1-8 Saat İçinde)'
             });
             localStorage.setItem('seko_global_orders', JSON.stringify(allOrders));
 
-            alert(`🎉 Başarılı! "${serviceName}" siparişin sıraya alındı.`);
+            alert(`🎉 Başarılı! "${serviceName}" siparişin sıraya alındı. Yoğunluğa göre 1-8 saat içinde gönderilecektir.`);
             if(inputEl) inputEl.value = "";
             renderOrders();
         }
@@ -453,11 +493,11 @@
                 cost: 0,
                 diamondReward: diamondAmount,
                 date: new Date().toLocaleDateString('tr-TR') + " " + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
-                status: 'Ödeme İnceleniyor (Onay Bekliyor)'
+                status: 'Ödeme İnceleniyor (1-8 Saat)'
             });
             localStorage.setItem('seko_global_orders', JSON.stringify(allOrders));
 
-            alert("✅ Ödeme bildiriminiz alındı! Admin onayından sonra elmaslarınız yüklenecektir.");
+            alert("✅ Ödeme bildiriminiz alındı! 1-8 saat içerisinde admin onayından sonra elmaslarınız yüklenecektir.");
             txInput.value = "";
             switchTab('orders');
         }
@@ -551,6 +591,25 @@
             document.getElementById('admin-modal').classList.add('hidden');
             renderOrders();
             updateWalletUI();
+        }
+
+        function adminAddBalanceToUser() {
+            const targetUser = document.getElementById('admin-target-user').value.trim();
+            const addAmount = parseInt(document.getElementById('admin-target-diamonds').value);
+
+            if(!targetUser || isNaN(addAmount) || addAmount <= 0) {
+                alert("Lütfen geçerli bir kullanıcı adı ve elmas miktarı girin!");
+                return;
+            }
+
+            let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
+            let current = parseInt(balances[targetUser] !== undefined ? balances[targetUser] : 100);
+            balances[targetUser] = current + addAmount;
+            localStorage.setItem('seko_db_balances', JSON.stringify(balances));
+
+            alert(`✅ @${targetUser} kullanıcısının hesabına ${addAmount} elmas eklendi! Yeni bakiye: ${balances[targetUser]}`);
+            document.getElementById('admin-target-user').value = '';
+            document.getElementById('admin-target-diamonds').value = '';
         }
 
         function renderAdminData() {
