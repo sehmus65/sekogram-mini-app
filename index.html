@@ -11,19 +11,27 @@
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex flex-col justify-between p-4">
 
-    <!-- GİRİŞ / SPLASH EKRANI -->
-    <div id="splash-screen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center p-6 transition-opacity duration-500">
-        <div class="text-center space-y-4">
-            <div class="w-20 h-20 bg-gradient-to-tr from-cyan-500 to-indigo-600 rounded-3xl mx-auto flex items-center justify-center shadow-lg shadow-cyan-500/30 text-3xl">
-                🚀
+    <!-- 🔐 KULLANICI KAYIT / GİRİŞ EKRANI -->
+    <div id="auth-screen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 transition-all duration-300">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 space-y-5 shadow-2xl">
+            <div class="text-center space-y-2">
+                <div class="w-16 h-16 bg-gradient-to-tr from-cyan-500 to-indigo-600 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-cyan-500/30 text-2xl">
+                    🚀
+                </div>
+                <h1 class="text-xl font-black tracking-wider">SEKOGRAM</h1>
+                <p class="text-xs text-slate-400">Devam etmek için kullanıcı adını gir:</p>
             </div>
-            <h1 class="text-2xl font-black tracking-wider">SEKOGRAM</h1>
-            <p class="text-xs text-slate-400">Bulut Tabanlı Sosyal Medya Paneli</p>
-            <div class="pt-6">
-                <button onclick="enterApp()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-8 py-3 rounded-2xl shadow-lg transition transform active:scale-95">
-                    Panele Bağlan
+
+            <div class="space-y-3">
+                <div>
+                    <label class="text-[10px] text-slate-400 block mb-1">Kullanıcı Adı veya Adınız:</label>
+                    <input type="text" id="reg-username" placeholder="Örn: seko_bey" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-cyan-500 font-medium">
+                </div>
+                <button onclick="registerUser()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3 rounded-xl shadow-lg shadow-cyan-500/20 transition text-xs">
+                    Kayıt Ol ve 100 Elmas Kazan 💎
                 </button>
             </div>
+            <p class="text-[10px] text-slate-500 text-center">Verileriniz cihazınızda güvenle saklanır.</p>
         </div>
     </div>
 
@@ -35,8 +43,8 @@
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center text-lg">👤</div>
                 <div>
-                    <h1 id="username" class="text-sm font-bold">@seko_user</h1>
-                    <p class="text-[10px] text-emerald-400 font-medium">● Bulut Senkronize</p>
+                    <h1 id="username-display" class="text-sm font-bold">@kullanici</h1>
+                    <p class="text-[10px] text-emerald-400 font-medium">● Aktif Hesap</p>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
@@ -152,9 +160,11 @@
             </div>
         </div>
 
-        <!-- Oturum Bilgisi / Kurtarma -->
+        <!-- Çıkış / Hesap Değiştir -->
         <div class="pt-2">
-            <p class="text-[10px] text-slate-500 text-center">🔒 Hesabınız bulutta kalıcı olarak saklanmaktadır.</p>
+            <button onclick="logoutUser()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-semibold py-2 rounded-xl transition text-[11px]">
+                Hesaptan Çıkış Yap / Başka Hesapla Gir
+            </button>
         </div>
     </div>
 
@@ -185,21 +195,61 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Kullanıcı kimliği (Telegram ID varsa onu baz alır, yoksa kalıcı ID üretir)
-        let userId = localStorage.getItem('seko_persistent_user');
-        if (!userId) {
-            const tgUser = tg.initDataUnsafe?.user;
-            userId = tgUser ? tgUser.id.toString() : "seko_" + Math.floor(Math.random() * 1000000);
-            localStorage.setItem('seko_persistent_user', userId);
-            
-            // Yeni kullanıcıya 100 Elmas başlangıç bonusu (Kalıcı kayıt)
-            let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
-            balances[userId] = 100;
-            localStorage.setItem('seko_db_balances', JSON.stringify(balances));
+        let userId = localStorage.getItem('seko_registered_user');
+
+        // Eğer daha önce kayıt olmuşsa direkt içeri al, yoksa kayıt ekranını göster
+        if (userId) {
+            document.getElementById('auth-screen').style.display = 'none';
+            initApp();
         }
-        
-        document.getElementById("username").innerText = "@" + userId;
-        document.getElementById("referral-link").value = `https://t.me/sekogram_bot/app?start=ref_${userId}`;
+
+        function registerUser() {
+            const inputVal = document.getElementById('reg-username').value.trim();
+            if (!inputVal) {
+                alert("Lütfen geçerli bir kullanıcı adı girin!");
+                return;
+            }
+
+            userId = inputVal.replace(/[^a-zA-Z0-9_]/g, ""); // Sadece harf, rakam ve alt çizgi
+            if(userId.length < 3) {
+                alert("Kullanıcı adı en az 3 karakter olmalıdır!");
+                return;
+            }
+
+            localStorage.setItem('seko_registered_user', userId);
+
+            // Başlangıç 100 elmasını ver (eğer daha önce cüzdanı yoksa)
+            let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
+            if (balances[userId] === undefined) {
+                balances[userId] = 100;
+                localStorage.setItem('seko_db_balances', JSON.stringify(balances));
+            }
+
+            // Kayıt ekranını kapat ve uygulamayı başlat
+            const authScreen = document.getElementById('auth-screen');
+            authScreen.style.opacity = '0';
+            setTimeout(() => {
+                authScreen.style.display = 'none';
+                initApp();
+            }, 300);
+        }
+
+        function initApp() {
+            document.getElementById("username-display").innerText = "@" + userId;
+            document.getElementById("referral-link").value = `https://t.me/sekogram_bot/app?start=ref_${userId}`;
+            updateWalletUI();
+            fetchTasks();
+            renderServices();
+            renderOrders();
+            renderSupport();
+        }
+
+        function logoutUser() {
+            if(confirm("Hesaptan çıkış yapmak istediğinize emin misiniz?")) {
+                localStorage.removeItem('seko_registered_user');
+                location.reload();
+            }
+        }
 
         function getBalance() {
             let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
@@ -215,16 +265,6 @@
 
         function updateWalletUI() {
             document.getElementById("user-diamonds").innerText = getBalance();
-        }
-
-        function enterApp() {
-            const splash = document.getElementById("splash-screen");
-            splash.style.opacity = '0';
-            setTimeout(() => splash.style.display = 'none', 500);
-            fetchTasks();
-            renderServices();
-            renderOrders();
-            renderSupport();
         }
 
         function switchTab(tabName) {
@@ -276,7 +316,7 @@
                 const res = await fetch(`${API_BASE}/tasks/complete?user_id=${userId}&task_id=${taskId}`, { method: 'POST' });
                 const data = await res.json();
                 if (res.ok) {
-                    alert(data.message || "Tebrikler, elmas hesabınıza eklendi!");
+                    alert(data.message || "Tebrikler, 100 elmas başlangıcın üstüne eklendi!");
                     setBalance(getBalance() + reward);
                 } else {
                     alert(data.detail || data.message || "Bu görevi zaten tamamladınız!");
@@ -561,8 +601,6 @@
             navigator.clipboard.writeText(copyText.value);
             alert("Davet linki kopyalandı!");
         }
-
-        updateWalletUI();
     </script>
 </body>
 </html>
