@@ -33,7 +33,7 @@
 
     <!-- Alt Bilgi / Buton -->
     <div class="w-full max-w-md">
-        <button onclick="fetchTasks()" class="w-full bg-indigo-600 hover:bg-indigo-500 font-semibold py-3 rounded-xl transition">
+        <button onclick="fetchTasks(); updateWallet();" class="w-full bg-indigo-600 hover:bg-indigo-500 font-semibold py-3 rounded-xl transition">
             Görevleri Yenile
         </button>
     </div>
@@ -49,16 +49,20 @@
         const userId = tg.initDataUnsafe?.user?.username || "sehmus.n1";
         document.getElementById("username").innerText = "@" + userId;
 
-        // Kullanıcı Kaydı ve Cüzdan Bilgisini Çek
-        async function registerUser() {
+        // Cüzdan Bakiyesini ve Kullanıcıyı Güncelle
+        async function updateWallet() {
             try {
                 const res = await fetch(`${API_BASE}/users/register?user_id=${userId}`, { method: 'POST' });
                 const data = await res.json();
-                if (data && data.diamonds !== undefined) {
-                    document.getElementById("user-diamonds").innerText = data.diamonds;
+                console.log("Kullanıcı/Cüzdan verisi:", data);
+                
+                // Backend'den dönen yapıya göre elmas miktarını ekrana basıyoruz
+                if (data) {
+                    const diamonds = data.diamonds !== undefined ? data.diamonds : (data.user?.diamonds || 0);
+                    document.getElementById("user-diamonds").innerText = diamonds;
                 }
             } catch (err) {
-                console.error("Kayıt hatası:", err);
+                console.error("Cüzdan güncelleme hatası:", err);
             }
         }
 
@@ -101,10 +105,10 @@
                 
                 if (res.ok) {
                     alert(data.message || "Tebrikler, ödül alındı!");
-                    registerUser(); // Cüzdanı güncelle
-                    fetchTasks();
+                    await updateWallet(); // Cüzdanı anında güncelle
+                    await fetchTasks();
                 } else {
-                    alert("Bir hata oluştu veya görev zaten tamamlandı.");
+                    alert(data.detail || "Bir hata oluştu veya görev zaten tamamlandı.");
                 }
             } catch (err) {
                 alert("Bağlantı hatası!");
@@ -112,7 +116,7 @@
         }
 
         // Sayfa açıldığında çalıştır
-        registerUser().then(fetchTasks);
+        updateWallet().then(fetchTasks);
     </script>
 </body>
 </html>
