@@ -68,7 +68,7 @@
             <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Tüm Sosyal Medya Servisleri</h2>
             
             <div class="space-y-3" id="services-list-container">
-                <!-- Javascript ile doldurulacak dev servis listesi -->
+                <!-- Javascript ile doldurulacak güncel ve pahalı servis listesi -->
             </div>
         </div>
 
@@ -92,7 +92,7 @@
         if (!userId) {
             userId = "seko_" + Math.floor(Math.random() * 100000);
             localStorage.setItem('seko_random_user', userId);
-            localStorage.setItem('seko_balance_' + userId, '50'); // Test için bol ikramiye
+            localStorage.setItem('seko_balance_' + userId, '100'); // Yeni başlangıç ikramiyesi
         }
         
         document.getElementById("username").innerText = "@" + userId;
@@ -189,18 +189,18 @@
             }
         }
 
-        // DEV SERVİS LİSTESİ (Instagram, TikTok, Telegram, YouTube vb.)
+        // GÜNCELLENMİŞ VE PİYASAYA UYGUN (DEĞERLİ) SERVİS LİSTESİ
         const megaServices = [
-            { id: 1, name: "Instagram Türk Takipçi (HQ)", desc: "100 Takipçi (Garantili)", cost: 25, placeholder: "Kullanıcı adınızı girin" },
-            { id: 2, name: "Instagram Gönderi Beğeni", desc: "250 Beğeni (Anlık Gönderim)", cost: 15, placeholder: "Gönderi linkini girin" },
-            { id: 3, name: "Instagram Hikaye (Story) İzlenme", desc: "1000 İzlenme", cost: 10, placeholder: "Profil veya hikaye linki" },
-            { id: 4, name: "TikTok Video İzlenme", desc: "5000 İzlenme", cost: 10, placeholder: "TikTok video linki" },
-            { id: 5, name: "TikTok Takipçi", desc: "50 Takipçi", cost: 20, placeholder: "TikTok kullanıcı adı" },
-            { id: 6, name: "TikTok Canlı Yayın Beğeni", desc: "1000 Beğeni", cost: 15, placeholder: "TikTok profil linki" },
-            { id: 7, name: "Telegram Kanal Abonesi", desc: "100 Abone (Türk/Aktif)", cost: 30, placeholder: "t.me/kanaliniz" },
-            { id: 8, name: "Telegram Grup Üyesi", desc: "200 Üye", cost: 25, placeholder: "t.me/grubunuz" },
-            { id: 9, name: "YouTube Abone", desc: "30 Abone (Kalıcı)", cost: 35, placeholder: "YouTube kanal linki" },
-            { id: 10, name: "YouTube Video İzlenme", desc: "500 İzlenme (400 Saat Katkılı)", cost: 20, placeholder: "YouTube video linki" }
+            { id: 1, name: "Instagram Türk Takipçi (HQ)", desc: "100 Takipçi (Garantili)", cost: 350, placeholder: "Kullanıcı adınızı girin" },
+            { id: 2, name: "Instagram Gönderi Beğeni", desc: "250 Beğeni (Anlık Gönderim)", cost: 200, placeholder: "Gönderi linkini girin" },
+            { id: 3, name: "Instagram Hikaye (Story) İzlenme", desc: "1000 İzlenme", cost: 150, placeholder: "Profil veya hikaye linki" },
+            { id: 4, name: "TikTok Video İzlenme", desc: "5000 İzlenme", cost: 180, placeholder: "TikTok video linki" },
+            { id: 5, name: "TikTok Takipçi", desc: "100 Takipçi", cost: 320, placeholder: "TikTok kullanıcı adı" },
+            { id: 6, name: "TikTok Canlı Yayın Beğeni", desc: "1000 Beğeni", cost: 220, placeholder: "TikTok profil linki" },
+            { id: 7, name: "Telegram Kanal Abonesi", desc: "100 Abone (Türk/Aktif)", cost: 300, placeholder: "t.me/kanaliniz" },
+            { id: 8, name: "Telegram Grup Üyesi", desc: "200 Üye", cost: 250, placeholder: "t.me/grubunuz" },
+            { id: 9, name: "YouTube Abone", desc: "30 Abone (Kalıcı)", cost: 400, placeholder: "YouTube kanal linki" },
+            { id: 10, name: "YouTube Video İzlenme", desc: "500 İzlenme", cost: 250, placeholder: "YouTube video linki" }
         ];
 
         // Servisleri ekrana bas
@@ -228,11 +228,6 @@
         }
 
         // Sipariş Verme Mantığı
-        function orderService(cost, serviceName) {
-            // Geriye dönük uyumluluk için
-            orderMegaService(cost, serviceName, 0);
-        }
-
         function orderMegaService(cost, serviceName, serviceId) {
             let currentBalance = parseInt(localStorage.getItem('seko_balance_' + userId) || '0');
             
