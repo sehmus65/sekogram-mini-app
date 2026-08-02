@@ -45,8 +45,8 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Test için kullanıcı ID'si (Telegram'dan gelmezse yedek)
-        const userId = tg.initDataUnsafe?.user?.username || "sehmus.n1";
+        // Test için yeni kullanıcı adı (Her testte burayı değiştirebilirsin)
+        const userId = tg.initDataUnsafe?.user?.username || "sehmus_test2";
         document.getElementById("username").innerText = "@" + userId;
 
         // Cüzdan Bakiyesini ve Kullanıcıyı Güncelle
@@ -54,9 +54,7 @@
             try {
                 const res = await fetch(`${API_BASE}/users/register?user_id=${userId}`, { method: 'POST' });
                 const data = await res.json();
-                console.log("Kullanıcı/Cüzdan verisi:", data);
                 
-                // Backend'den dönen yapıya göre elmas miktarını ekrana basıyoruz
                 if (data) {
                     const diamonds = data.diamonds !== undefined ? data.diamonds : (data.user?.diamonds || 0);
                     document.getElementById("user-diamonds").innerText = diamonds;
