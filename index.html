@@ -3,48 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SekoGram</title>
+    <title>SekoGram - Mega Sosyal Medya Paneli</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-between p-4">
+<body class="bg-slate-900 text-white min-h-screen flex flex-col justify-between p-4">
 
-    <!-- Header / Profil -->
-    <div class="w-full max-w-md bg-slate-800 p-4 rounded-2xl shadow-lg flex items-center justify-between">
-        <div>
-            <h1 id="username" class="text-lg font-bold">Yükleniyor...</h1>
-            <p class="text-xs text-slate-400">SekoGram Cüzdanı</p>
-        </div>
-        <div class="flex items-center space-x-2 bg-slate-700 px-3 py-1.5 rounded-xl">
-            <span class="text-cyan-400 font-bold" id="user-diamonds">0</span>
-            <span class="text-sm">💎</span>
-        </div>
-    </div>
-
-    <!-- Görevler Listesi -->
-    <div class="w-full max-w-md my-4 flex-1 overflow-y-auto space-y-3">
-        <h2 class="text-md font-semibold text-slate-300">Kazan-Kazan Görevleri</h2>
-        <div id="tasks-container" class="space-y-2">
-            <!-- Dinamik görevler buraya gelecek -->
+    <!-- GİRİŞ / SPLASH EKRANI -->
+    <div id="splash-screen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center p-6 transition-opacity duration-500">
+        <div class="text-center space-y-4">
+            <div class="w-20 h-20 bg-gradient-to-tr from-cyan-500 to-indigo-600 rounded-3xl mx-auto flex items-center justify-center shadow-lg shadow-cyan-500/30 text-3xl">
+                🚀
+            </div>
+            <h1 class="text-2xl font-black tracking-wider">SEKOGRAM</h1>
+            <p class="text-xs text-slate-400">Mega Sosyal Medya Büyüme Paneli</p>
+            <div class="pt-6">
+                <button onclick="enterApp()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-8 py-3 rounded-2xl shadow-lg transition transform active:scale-95">
+                    Panele Giriş Yap
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Alt Bilgi / Butonlar -->
-    <div class="w-full max-w-md space-y-2">
-        <button onclick="localStorage.clear(); location.reload();" class="w-full bg-rose-600 hover:bg-rose-500 font-semibold py-2.5 rounded-xl transition text-xs">
-            Yeni Test Kullanıcısı Oluştur (Reset)
-        </button>
-        <button onclick="fetchTasks();" class="w-full bg-indigo-600 hover:bg-indigo-500 font-semibold py-3 rounded-xl transition">
-            Görevleri Yenile
-        </button>
+    <!-- ANA UYGULAMA İÇERİĞİ -->
+    <div class="w-full max-w-md mx-auto flex flex-col flex-1 justify-between space-y-4">
+        
+        <!-- Üst Profil ve Cüzdan Barı -->
+        <div class="bg-slate-800 p-4 rounded-2xl shadow-lg flex items-center justify-between border border-slate-700/50">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center text-lg">👤</div>
+                <div>
+                    <h1 id="username" class="text-sm font-bold">@seko_user</h1>
+                    <p class="text-[10px] text-emerald-400 font-medium">● Çevrimiçi / Mega Panel</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700">
+                <span class="text-cyan-400 font-extrabold" id="user-diamonds">0</span>
+                <span class="text-sm">💎</span>
+            </div>
+        </div>
+
+        <!-- Sekme Geçiş Butonları -->
+        <div class="flex bg-slate-800 p-1 rounded-xl border border-slate-700/50">
+            <button onclick="switchTab('tasks')" id="btn-tab-tasks" class="flex-1 py-2 text-xs font-bold rounded-lg bg-cyan-500 text-slate-950 transition">
+                💎 Elmas Kazan
+            </button>
+            <button onclick="switchTab('services')" id="btn-tab-services" class="flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition">
+                🚀 Mega Servisler
+            </button>
+        </div>
+
+        <!-- SEKME 1: GÖREVLER (Elmas Kazanma) -->
+        <div id="tab-tasks" class="space-y-3 flex-1 overflow-y-auto">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Ücretsiz Elmas Kazan</h2>
+            <div id="tasks-container" class="space-y-2">
+                <!-- Dinamik görevler buraya dolacak -->
+            </div>
+        </div>
+
+        <!-- SEKME 2: SERVİSLER (Mega Sosyal Medya Paneli) -->
+        <div id="tab-services" class="space-y-3 flex-1 overflow-y-auto hidden">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Tüm Sosyal Medya Servisleri</h2>
+            
+            <div class="space-y-3" id="services-list-container">
+                <!-- Javascript ile doldurulacak dev servis listesi -->
+            </div>
+        </div>
+
+        <!-- Alt Kontroller / Reset -->
+        <div class="pt-2">
+            <button onclick="localStorage.clear(); location.reload();" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-semibold py-2 rounded-xl transition text-[11px]">
+                Test Oturumunu Sıfırla (Reset)
+            </button>
+        </div>
     </div>
 
     <script>
         const API_BASE = "https://sekogram-backend.vercel.app/api";
         
-        // Telegram WebApp verilerini al
+        // Telegram WebApp entegrasyonu
         const tg = window.Telegram.WebApp;
         tg.expand();
 
@@ -53,21 +92,54 @@
         if (!userId) {
             userId = "seko_" + Math.floor(Math.random() * 100000);
             localStorage.setItem('seko_random_user', userId);
-            localStorage.setItem('seko_balance_' + userId, '0');
+            localStorage.setItem('seko_balance_' + userId, '50'); // Test için bol ikramiye
         }
         
         document.getElementById("username").innerText = "@" + userId;
 
-        // Cüzdanı hafızadan ekrana yazdır
+        // Cüzdan UI Güncelleme
         function updateWalletUI() {
             const currentBalance = localStorage.getItem('seko_balance_' + userId) || '0';
             document.getElementById("user-diamonds").innerText = currentBalance;
         }
 
+        // Giriş Ekranını Kapat
+        function enterApp() {
+            const splash = document.getElementById("splash-screen");
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.display = 'none';
+            }, 500);
+            fetchTasks();
+            renderServices();
+        }
+
+        // Sekme Değiştirme
+        function switchTab(tabName) {
+            const tabTasks = document.getElementById("tab-tasks");
+            const tabServices = document.getElementById("tab-services");
+            const btnTasks = document.getElementById("btn-tab-tasks");
+            const btnServices = document.getElementById("btn-tab-services");
+
+            if (tabName === 'tasks') {
+                tabTasks.classList.remove('hidden');
+                tabServices.classList.add('hidden');
+                btnTasks.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-cyan-500 text-slate-950 transition";
+                btnServices.className = "flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition";
+                fetchTasks();
+            } else {
+                tabTasks.classList.add('hidden');
+                tabServices.classList.remove('hidden');
+                btnServices.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-cyan-500 text-slate-950 transition";
+                btnTasks.className = "flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition";
+                renderServices();
+            }
+        }
+
         // Görevleri Çek
         async function fetchTasks() {
             const container = document.getElementById("tasks-container");
-            container.innerHTML = "<p class='text-center text-slate-400'>Yükleniyor...</p>";
+            container.innerHTML = "<p class='text-center text-xs text-slate-400 py-4'>Görevler yükleniyor...</p>";
 
             try {
                 const res = await fetch(`${API_BASE}/tasks`);
@@ -77,13 +149,13 @@
                     container.innerHTML = "";
                     data.tasks.forEach(task => {
                         container.innerHTML += `
-                            <div class="bg-slate-800 p-4 rounded-xl flex items-center justify-between">
+                            <div class="bg-slate-800 p-3.5 rounded-xl flex items-center justify-between border border-slate-700/40">
                                 <div>
-                                    <h3 class="font-semibold text-sm">${task.title}</h3>
-                                    <p class="text-xs text-slate-400">${task.description}</p>
-                                    <span class="text-xs text-cyan-400 mt-1 inline-block">+${task.reward_diamonds} Elmas</span>
+                                    <h3 class="font-semibold text-xs text-white">${task.title}</h3>
+                                    <p class="text-[10px] text-slate-400 mt-0.5">${task.description}</p>
+                                    <span class="text-[10px] text-cyan-400 font-bold mt-1 inline-block">+${task.reward_diamonds} Elmas</span>
                                 </div>
-                                <button onclick="completeTask('${task.id}', ${task.reward_diamonds})" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-4 py-2 rounded-lg font-medium transition">
+                                <button onclick="completeTask('${task.id}', ${task.reward_diamonds})" class="bg-emerald-600 hover:bg-emerald-500 text-[11px] px-3.5 py-2 rounded-lg font-medium transition">
                                     Tamamla
                                 </button>
                             </div>
@@ -91,36 +163,104 @@
                     });
                 }
             } catch (err) {
-                container.innerHTML = "<p class='text-center text-red-400'>Görevler yüklenemedi!</p>";
+                container.innerHTML = "<p class='text-center text-xs text-red-400 py-4'>Görevler yüklenemedi!</p>";
             }
         }
 
-        // Görevi Tamamlama ve Bakiyeyi Artırma
+        // Görevi Tamamlama ve Elmas Ekleme
         async function completeTask(taskId, reward) {
             try {
                 const res = await fetch(`${API_BASE}/tasks/complete?user_id=${userId}&task_id=${taskId}`, { method: 'POST' });
                 const data = await res.json();
                 
                 if (res.ok) {
-                    alert(data.message || "Tebrikler, ödül alındı!");
+                    alert(data.message || "Tebrikler, elmas hesabınıza eklendi!");
                     
-                    // Bakiyeyi güncelle ve hafızaya kaydet
                     let currentBalance = parseInt(localStorage.getItem('seko_balance_' + userId) || '0');
                     currentBalance += reward;
                     localStorage.setItem('seko_balance_' + userId, currentBalance);
                     
                     updateWalletUI();
                 } else {
-                    alert(data.detail || data.message || "Bu görevi zaten tamamladınız!!");
+                    alert(data.detail || data.message || "Bu görevi zaten tamamladınız!");
                 }
             } catch (err) {
                 alert("Bağlantı hatası!");
             }
         }
 
-        // Sayfa açıldığında çalıştır
+        // DEV SERVİS LİSTESİ (Instagram, TikTok, Telegram, YouTube vb.)
+        const megaServices = [
+            { id: 1, name: "Instagram Türk Takipçi (HQ)", desc: "100 Takipçi (Garantili)", cost: 25, placeholder: "Kullanıcı adınızı girin" },
+            { id: 2, name: "Instagram Gönderi Beğeni", desc: "250 Beğeni (Anlık Gönderim)", cost: 15, placeholder: "Gönderi linkini girin" },
+            { id: 3, name: "Instagram Hikaye (Story) İzlenme", desc: "1000 İzlenme", cost: 10, placeholder: "Profil veya hikaye linki" },
+            { id: 4, name: "TikTok Video İzlenme", desc: "5000 İzlenme", cost: 10, placeholder: "TikTok video linki" },
+            { id: 5, name: "TikTok Takipçi", desc: "50 Takipçi", cost: 20, placeholder: "TikTok kullanıcı adı" },
+            { id: 6, name: "TikTok Canlı Yayın Beğeni", desc: "1000 Beğeni", cost: 15, placeholder: "TikTok profil linki" },
+            { id: 7, name: "Telegram Kanal Abonesi", desc: "100 Abone (Türk/Aktif)", cost: 30, placeholder: "t.me/kanaliniz" },
+            { id: 8, name: "Telegram Grup Üyesi", desc: "200 Üye", cost: 25, placeholder: "t.me/grubunuz" },
+            { id: 9, name: "YouTube Abone", desc: "30 Abone (Kalıcı)", cost: 35, placeholder: "YouTube kanal linki" },
+            { id: 10, name: "YouTube Video İzlenme", desc: "500 İzlenme (400 Saat Katkılı)", cost: 20, placeholder: "YouTube video linki" }
+        ];
+
+        // Servisleri ekrana bas
+        function renderServices() {
+            const container = document.getElementById("services-list-container");
+            container.innerHTML = "";
+
+            megaServices.forEach(s => {
+                container.innerHTML += `
+                    <div class="bg-slate-800 p-4 rounded-xl border border-slate-700/50 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-sm text-cyan-300">${s.name}</h3>
+                                <p class="text-[11px] text-slate-400">${s.desc} • <span class="text-cyan-400 font-bold">${s.cost} Elmas</span></p>
+                            </div>
+                            <span class="bg-cyan-500/10 text-cyan-400 text-[10px] px-2 py-1 rounded-md font-semibold">Aktif</span>
+                        </div>
+                        <input type="text" id="service-input-${s.id}" placeholder="${s.placeholder}" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+                        <button onclick="orderMegaService(${s.cost}, '${s.name}', ${s.id})" class="w-full bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold py-2 rounded-lg transition">
+                            Sipariş Ver (${s.cost} 💎)
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        // Sipariş Verme Mantığı
+        function orderService(cost, serviceName) {
+            // Geriye dönük uyumluluk için
+            orderMegaService(cost, serviceName, 0);
+        }
+
+        function orderMegaService(cost, serviceName, serviceId) {
+            let currentBalance = parseInt(localStorage.getItem('seko_balance_' + userId) || '0');
+            
+            let inputVal = "";
+            if(serviceId > 0) {
+                const inputElement = document.getElementById(`service-input-${serviceId}`);
+                if(inputElement) inputVal = inputElement.value.trim();
+            }
+
+            if (currentBalance < cost) {
+                alert(`Yetersiz elmas! Bu servis için ${cost} elmasa ihtiyacın var. Görevler sekmesinden elmas topla kral!`);
+                return;
+            }
+
+            // Elmas düş ve kaydet
+            currentBalance -= cost;
+            localStorage.setItem('seko_balance_' + userId, currentBalance);
+            updateWalletUI();
+
+            alert(`🎉 İşlem Başarılı! "${serviceName}" siparişin sıraya alındı. En kısa sürede gönderim yapılacaktır.`);
+            
+            if(serviceId > 0 && document.getElementById(`service-input-${serviceId}`)) {
+                document.getElementById(`service-input-${serviceId}`).value = "";
+            }
+        }
+
+        // İlk açılışta cüzdanı yükle
         updateWalletUI();
-        fetchTasks();
     </script>
 </body>
 </html>
