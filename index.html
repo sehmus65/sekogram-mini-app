@@ -18,10 +18,10 @@
                 🚀
             </div>
             <h1 class="text-2xl font-black tracking-wider">SEKOGRAM</h1>
-            <p class="text-xs text-slate-400">Mega Sosyal Medya Büyüme Paneli</p>
+            <p class="text-xs text-slate-400">Bulut Tabanlı Sosyal Medya Paneli</p>
             <div class="pt-6">
                 <button onclick="enterApp()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-8 py-3 rounded-2xl shadow-lg transition transform active:scale-95">
-                    Panele Giriş Yap
+                    Panele Bağlan
                 </button>
             </div>
         </div>
@@ -36,7 +36,7 @@
                 <div class="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center text-lg">👤</div>
                 <div>
                     <h1 id="username" class="text-sm font-bold">@seko_user</h1>
-                    <p class="text-[10px] text-emerald-400 font-medium">● Çevrimiçi / Manuel Sistem</p>
+                    <p class="text-[10px] text-emerald-400 font-medium">● Bulut Senkronize</p>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
@@ -72,12 +72,10 @@
             </button>
         </div>
 
-        <!-- SEKME 1: GÖREVLER (Elmas Kazanma) -->
+        <!-- SEKME 1: GÖREVLER -->
         <div id="tab-tasks" class="space-y-3 flex-1 overflow-y-auto">
             <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Ücretsiz Elmas Kazan</h2>
-            <div id="tasks-container" class="space-y-2">
-                <!-- Görevler buraya gelecek -->
-            </div>
+            <div id="tasks-container" class="space-y-2"></div>
         </div>
 
         <!-- SEKME 2: SERVİSLER -->
@@ -127,7 +125,7 @@
         <div id="tab-support" class="space-y-3 flex-1 overflow-y-auto hidden">
             <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Canlı Destek Hattı</h2>
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700/50 space-y-3">
-                <p class="text-[11px] text-slate-400">Sorun, öneri veya sipariş sorunların için direkt destek talebi oluşturabilirsin. Talebin anında Şehmus'a (Admin paneline) düşer!</p>
+                <p class="text-[11px] text-slate-400">Sorun, öneri veya sipariş sorunların için direkt destek talebi oluşturabilirsin.</p>
                 <textarea id="support-message" rows="3" placeholder="Mesajınızı veya sorununuzu buraya yazın..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-cyan-500"></textarea>
                 <button onclick="sendSupportTicket()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-xs font-semibold py-2.5 rounded-lg transition">
                     Destek Talebi Gönder 💬
@@ -154,15 +152,13 @@
             </div>
         </div>
 
-        <!-- Alt Reset -->
+        <!-- Oturum Bilgisi / Kurtarma -->
         <div class="pt-2">
-            <button onclick="localStorage.clear(); location.reload();" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-semibold py-2 rounded-xl transition text-[11px]">
-                Test Oturumunu Sıfırla (Reset)
-            </button>
+            <p class="text-[10px] text-slate-500 text-center">🔒 Hesabınız bulutta kalıcı olarak saklanmaktadır.</p>
         </div>
     </div>
 
-    <!-- ⚙️ GİZLİ / ÖZEL ADMIN PANELİ MODALI -->
+    <!-- ⚙️ ADMIN PANELİ MODALI -->
     <div id="admin-modal" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -173,16 +169,12 @@
             <div class="space-y-4">
                 <div>
                     <h3 class="text-xs font-bold text-cyan-300 mb-2">📋 Tüm Müşteri Siparişleri ve Ödeme Bildirimleri</h3>
-                    <div id="admin-orders-container" class="space-y-2 max-h-60 overflow-y-auto pr-1">
-                        <!-- Admin listesi -->
-                    </div>
+                    <div id="admin-orders-container" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
                 </div>
 
                 <div class="border-t border-slate-800 pt-3">
                     <h3 class="text-xs font-bold text-cyan-300 mb-2">💬 Gelen Canlı Destek Mesajları</h3>
-                    <div id="admin-support-container" class="space-y-2 max-h-40 overflow-y-auto pr-1">
-                        <!-- Destek mesajları -->
-                    </div>
+                    <div id="admin-support-container" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
                 </div>
             </div>
         </div>
@@ -193,19 +185,36 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let userId = localStorage.getItem('seko_random_user');
+        // Kullanıcı kimliği (Telegram ID varsa onu baz alır, yoksa kalıcı ID üretir)
+        let userId = localStorage.getItem('seko_persistent_user');
         if (!userId) {
-            userId = "seko_" + Math.floor(Math.random() * 100000);
-            localStorage.setItem('seko_random_user', userId);
-            localStorage.setItem('seko_balance_' + userId, '350');
+            const tgUser = tg.initDataUnsafe?.user;
+            userId = tgUser ? tgUser.id.toString() : "seko_" + Math.floor(Math.random() * 1000000);
+            localStorage.setItem('seko_persistent_user', userId);
+            
+            // Yeni kullanıcıya 100 Elmas başlangıç bonusu (Kalıcı kayıt)
+            let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
+            balances[userId] = 100;
+            localStorage.setItem('seko_db_balances', JSON.stringify(balances));
         }
         
         document.getElementById("username").innerText = "@" + userId;
         document.getElementById("referral-link").value = `https://t.me/sekogram_bot/app?start=ref_${userId}`;
 
+        function getBalance() {
+            let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
+            return parseInt(balances[userId] !== undefined ? balances[userId] : 100);
+        }
+
+        function setBalance(val) {
+            let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
+            balances[userId] = val;
+            localStorage.setItem('seko_db_balances', JSON.stringify(balances));
+            updateWalletUI();
+        }
+
         function updateWalletUI() {
-            const currentBalance = localStorage.getItem('seko_balance_' + userId) || '0';
-            document.getElementById("user-diamonds").innerText = currentBalance;
+            document.getElementById("user-diamonds").innerText = getBalance();
         }
 
         function enterApp() {
@@ -268,10 +277,7 @@
                 const data = await res.json();
                 if (res.ok) {
                     alert(data.message || "Tebrikler, elmas hesabınıza eklendi!");
-                    let currentBalance = parseInt(localStorage.getItem('seko_balance_' + userId) || '0');
-                    currentBalance += reward;
-                    localStorage.setItem('seko_balance_' + userId, currentBalance);
-                    updateWalletUI();
+                    setBalance(getBalance() + reward);
                 } else {
                     alert(data.detail || data.message || "Bu görevi zaten tamamladınız!");
                 }
@@ -310,7 +316,7 @@
         }
 
         function orderMegaService(cost, serviceName, serviceId) {
-            let currentBalance = parseInt(localStorage.getItem('seko_balance_' + userId) || '0');
+            let currentBalance = getBalance();
             let targetVal = "";
             const inputEl = document.getElementById(`service-input-${serviceId}`);
             if(inputEl) targetVal = inputEl.value.trim();
@@ -325,13 +331,10 @@
                 return;
             }
 
-            currentBalance -= cost;
-            localStorage.setItem('seko_balance_' + userId, currentBalance);
-            updateWalletUI();
+            setBalance(currentBalance - cost);
 
-            // Tüm genel siparişler havuzuna da ekleyelim (Admin görsün)
             let allOrders = JSON.parse(localStorage.getItem('seko_global_orders') || '[]');
-            const orderObj = {
+            allOrders.unshift({
                 id: Date.now(),
                 user: userId,
                 service: serviceName,
@@ -339,8 +342,7 @@
                 cost: cost,
                 date: new Date().toLocaleDateString('tr-TR') + " " + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
                 status: 'Sırada / Gönderiliyor'
-            };
-            allOrders.unshift(orderObj);
+            });
             localStorage.setItem('seko_global_orders', JSON.stringify(allOrders));
 
             alert(`🎉 Başarılı! "${serviceName}" siparişin sıraya alındı.`);
@@ -405,7 +407,6 @@
             });
         }
 
-        // Canlı Destek Fonksiyonları
         function sendSupportTicket() {
             const msgInput = document.getElementById('support-message');
             const msg = msgInput.value.trim();
@@ -453,10 +454,9 @@
             });
         }
 
-        // ⚙️ ADMIN PANELİ AÇMA / YÖNETME
         function openAdminPanel() {
             const pin = prompt("Admin Şifresini Girin:");
-            if(pin !== "1453" && pin !== "1234") { // Şifreyi burdan değiştirebilirsin, şimdilik 1453 yaptık
+            if(pin !== "1453" && pin !== "1234") {
                 if(pin !== null) alert("Yanlış şifre!");
                 return;
             }
@@ -471,7 +471,6 @@
         }
 
         function renderAdminData() {
-            // Siparişleri yükle
             const ordContainer = document.getElementById('admin-orders-container');
             let allOrders = JSON.parse(localStorage.getItem('seko_global_orders') || '[]');
             
@@ -500,7 +499,6 @@
                 });
             }
 
-            // Destek mesajlarını yükle
             const supContainer = document.getElementById('admin-support-container');
             let tickets = JSON.parse(localStorage.getItem('seko_support_tickets') || '[]');
             if(tickets.length === 0) {
@@ -526,11 +524,12 @@
             let allOrders = JSON.parse(localStorage.getItem('seko_global_orders') || '[]');
             let order = allOrders[index];
             
-            // Eğer bu bir bakiye yükleme talebiyse, kullanıcının cüzdanına elmasları ekleyelim!
             if(order.diamondReward) {
-                let targetUserBalance = parseInt(localStorage.getItem('seko_balance_' + order.user) || '0');
-                targetUserBalance += order.diamondReward;
-                localStorage.setItem('seko_balance_' + order.user, targetUserBalance);
+                let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
+                let targetBal = parseInt(balances[order.user] || 100);
+                targetBal += order.diamondReward;
+                balances[order.user] = targetBal;
+                localStorage.setItem('seko_db_balances', JSON.stringify(balances));
                 order.status = '✅ Onaylandı & Elmaslar Yüklendi';
             } else {
                 order.status = '✅ Tamamlandı / Gönderildi';
