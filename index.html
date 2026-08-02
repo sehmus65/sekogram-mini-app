@@ -109,4 +109,34 @@
         registerUser().then(fetchTasks);
     </script>
 </body>
+    <script>
+    // Backend URL'ini buraya yazıyoruz (senin FastAPI Vercel linkin)
+    const BACKEND_URL = "https://sekogram-mini-app.vercel.app"; // Kendi backend linkinle güncelleyebilirsin
+
+    async function completeTask(taskName, reward) {
+        try {
+            // Şimdilik test amaçlı kullanıcı adını @sehmus.n1 alıyoruz
+            const username = "sehmus.n1";
+            
+            const response = await fetch(`${BACKEND_URL}/complete-task`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username: username, task: taskName, reward: reward })
+            });
+            
+            const data = await response.json();
+            if (response.ok) {
+                alert(`Tebrikler! ${reward} elmas cüzdanına eklendi.`);
+                location.reload(); // Sayfayı yenileyip güncel elmas miktarını gösterelim
+            } else {
+                alert("Bir hata oluştu: " + data.detail);
+            }
+        } catch (error) {
+            console.error("Bağlantı hatası:", error);
+            alert("Sunucuya ulaşılamadı!");
+        }
+    }
+</script>
 </html>
