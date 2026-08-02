@@ -36,7 +36,7 @@
                 <div class="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center text-lg">👤</div>
                 <div>
                     <h1 id="username" class="text-sm font-bold">@seko_user</h1>
-                    <p class="text-[10px] text-emerald-400 font-medium">● Çevrimiçi / Mega Panel</p>
+                    <p class="text-[10px] text-emerald-400 font-medium">● Çevrimiçi / Manuel Sistem</p>
                 </div>
             </div>
             <div class="flex items-center space-x-2 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700">
@@ -45,19 +45,22 @@
             </div>
         </div>
 
-        <!-- Sekme Geçiş Butonları (4'lü Menü) -->
-        <div class="grid grid-cols-2 gap-1.5 bg-slate-800 p-1.5 rounded-xl border border-slate-700/50">
+        <!-- Sekme Geçiş Butonları (5'li Menü) -->
+        <div class="grid grid-cols-3 gap-1.5 bg-slate-800 p-1.5 rounded-xl border border-slate-700/50">
             <button onclick="switchTab('tasks')" id="btn-tab-tasks" class="py-2 text-[11px] font-bold rounded-lg bg-cyan-500 text-slate-950 transition">
                 💎 Elmas Kazan
             </button>
             <button onclick="switchTab('services')" id="btn-tab-services" class="py-2 text-[11px] font-bold rounded-lg text-slate-400 transition">
                 🚀 Servisler
             </button>
+            <button onclick="switchTab('deposit')" id="btn-tab-deposit" class="py-2 text-[11px] font-bold rounded-lg text-slate-400 transition">
+                💳 Bakiye Yükle
+            </button>
             <button onclick="switchTab('orders')" id="btn-tab-orders" class="py-2 text-[11px] font-bold rounded-lg text-slate-400 transition">
                 📋 Geçmişim
             </button>
-            <button onclick="switchTab('referral')" id="btn-tab-referral" class="py-2 text-[11px] font-bold rounded-lg text-slate-400 transition">
-                🎁 Davet Et
+            <button onclick="switchTab('referral')" id="btn-tab-referral" class="py-2 text-[11px] font-bold rounded-lg text-slate-400 transition col-span-2">
+                🎁 Arkadaşını Getir
             </button>
         </div>
 
@@ -73,19 +76,52 @@
         <div id="tab-services" class="space-y-3 flex-1 overflow-y-auto hidden">
             <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Tüm Sosyal Medya Servisleri</h2>
             <div class="space-y-3" id="services-list-container">
-                <!-- Javascript ile doldurulacak servis listesi -->
+                <!-- Servisler -->
             </div>
         </div>
 
-        <!-- SEKME 3: SİPARİŞ GEÇMİŞİ -->
+        <!-- SEKME 3: BAKİYE YÜKLE / ÖDEME YÖNTEMLERİ -->
+        <div id="tab-deposit" class="space-y-3 flex-1 overflow-y-auto hidden">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Elmas Satın Al / Bakiye Yükle</h2>
+            
+            <div class="space-y-3">
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700/50 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-sm text-cyan-300">Papara / IBAN ile Ödeme</h3>
+                        <span class="bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-0.5 rounded-md font-semibold">Anında Onay</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Aşağıdaki hesaplara ödemeyi yaptıktan sonra bildirim gönderin, elmaslarınız cüzdanınıza eklensin.</p>
+                    
+                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 space-y-1 text-xs">
+                        <p class="text-slate-300"><b>Papara No:</b> 1234 5678 90 (Şehmus A.)</p>
+                        <p class="text-slate-300"><b>IBAN:</b> TR33 0001 0000 1234 5678 9012 34</p>
+                    </div>
+
+                    <div class="space-y-2 pt-1">
+                        <label class="text-[10px] text-slate-400 block">Yüklemek İstediğiniz Tutar (TL / Elmas Paket Seçin):</label>
+                        <select id="deposit-package" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+                            <option value="500">50 TL = 500 Elmas</option>
+                            <option value="1200">100 TL = 1,200 Elmas (Avantajlı!)</option>
+                            <option value="3000">250 TL = 3,000 Elmas (Mega Paket!)</option>
+                        </select>
+                        <input type="text" id="deposit-txid" placeholder="İşlem Dekont No veya Gönderen Adı Soyadı" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+                        <button onclick="requestDeposit()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold py-2.5 rounded-lg transition">
+                            Ödeme Bildirimi Gönder
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEKME 4: SİPARİŞ GEÇMİŞİ -->
         <div id="tab-orders" class="space-y-3 flex-1 overflow-y-auto hidden">
             <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Aktif ve Geçmiş Siparişlerim</h2>
             <div id="orders-container" class="space-y-2">
-                <!-- Geçmiş siparişler buraya dolacak -->
+                <!-- Geçmiş siparişler -->
             </div>
         </div>
 
-        <!-- SEKME 4: REFERRAL (DAVET ET KAZAN) -->
+        <!-- SEKME 5: REFERRAL (DAVET ET KAZAN) -->
         <div id="tab-referral" class="space-y-3 flex-1 overflow-y-auto hidden">
             <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Arkadaşını Getir, Elmasları Kap</h2>
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700/50 space-y-4 text-center">
@@ -125,7 +161,7 @@
         if (!userId) {
             userId = "seko_" + Math.floor(Math.random() * 100000);
             localStorage.setItem('seko_random_user', userId);
-            localStorage.setItem('seko_balance_' + userId, '500'); // Test için bol ikramiye
+            localStorage.setItem('seko_balance_' + userId, '350'); // Başlangıç ikramiyesi
         }
         
         document.getElementById("username").innerText = "@" + userId;
@@ -151,14 +187,16 @@
 
         // Sekme Değiştirme
         function switchTab(tabName) {
-            const tabs = ['tasks', 'services', 'orders', 'referral'];
+            const tabs = ['tasks', 'services', 'deposit', 'orders', 'referral'];
             tabs.forEach(t => {
-                document.getElementById(`tab-${t}`).classList.add('hidden');
-                document.getElementById(`btn-tab-${t}`).className = "py-2 text-[11px] font-bold rounded-lg text-slate-400 transition";
+                const el = document.getElementById(`tab-${t}`);
+                const btn = document.getElementById(`btn-tab-${t}`);
+                if(el) el.classList.add('hidden');
+                if(btn) btn.className = "py-2 text-[11px] font-bold rounded-lg text-slate-400 transition " + (t === 'referral' ? 'col-span-2' : '');
             });
 
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            document.getElementById(`btn-tab-${tabName}`).className = "py-2 text-[11px] font-bold rounded-lg bg-cyan-500 text-slate-950 transition";
+            document.getElementById(`btn-tab-${tabName}`).className = "py-2 text-[11px] font-bold rounded-lg bg-cyan-500 text-slate-950 transition " + (tabName === 'referral' ? 'col-span-2' : '');
 
             if(tabName === 'tasks') fetchTasks();
             if(tabName === 'services') renderServices();
@@ -266,16 +304,14 @@
             }
 
             if (currentBalance < cost) {
-                alert(`Yetersiz elmas! Bu servis için ${cost} elmasa ihtiyacın var. Görevlerden elmas topla!`);
+                alert(`Yetersiz elmas! Bu servis için ${cost} elmasa ihtiyacın var. 'Bakiye Yükle' veya 'Görevler' sekmesini kullanabilirsin.`);
                 return;
             }
 
-            // Elmas düş
             currentBalance -= cost;
             localStorage.setItem('seko_balance_' + userId, currentBalance);
             updateWalletUI();
 
-            // Siparişi local history'e kaydet
             let orders = JSON.parse(localStorage.getItem('seko_orders_' + userId) || '[]');
             orders.unshift({
                 service: serviceName,
@@ -293,13 +329,41 @@
             renderOrders();
         }
 
-        // Siparişleri Listele
+        // Ödeme Bildirimi Gönderme
+        function requestDeposit() {
+            const selectEl = document.getElementById('deposit-package');
+            const txInput = document.getElementById('deposit-txid');
+            const diamondAmount = parseInt(selectEl.value);
+            const txVal = txInput.value.trim();
+
+            if(!txVal) {
+                alert("Lütfen ödeme yaptığınıza dair bir açıklama veya dekont no girin!");
+                return;
+            }
+
+            // Ödeme talebini siparişler listesine veya ayrı bir yere işleyelim ki sen görebilgesin
+            let orders = JSON.parse(localStorage.getItem('seko_orders_' + userId) || '[]');
+            orders.unshift({
+                service: `💳 Bakiye Yükleme (+${diamondAmount} Elmas)`,
+                target: `Dekont/İşlem: ${txVal}`,
+                cost: 0,
+                date: new Date().toLocaleDateString('tr-TR') + " " + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
+                status: 'Ödeme İnceleniyor (Onay Bekliyor)'
+            });
+            localStorage.setItem('seko_orders_' + userId, JSON.stringify(orders));
+
+            alert("✅ Ödeme bildiriminiz alındı! Kontrol edildikten sonra elmaslarınız hesabınıza yüklenecektir.");
+            txInput.value = "";
+            switchTab('orders');
+        }
+
+        // Siparişleri ve Bildirimleri Listele
         function renderOrders() {
             const container = document.getElementById("orders-container");
             let orders = JSON.parse(localStorage.getItem('seko_orders_' + userId) || '[]');
 
             if(orders.length === 0) {
-                container.innerHTML = "<p class='text-center text-xs text-slate-400 py-6'>Henüz bir siparişin bulunmuyor.</p>";
+                container.innerHTML = "<p class='text-center text-xs text-slate-400 py-6'>Henüz bir siparişin veya işlemin bulunmuyor.</p>";
                 return;
             }
 
@@ -311,9 +375,9 @@
                             <h3 class="font-bold text-xs text-white">${o.service}</h3>
                             <span class="bg-amber-500/10 text-amber-400 text-[10px] px-2 py-0.5 rounded-md font-semibold">${o.status}</span>
                         </div>
-                        <p class="text-[11px] text-slate-300 truncate">Hedef: <span class="text-cyan-400">${o.target}</span></p>
+                        <p class="text-[11px] text-slate-300 truncate">Detay: <span class="text-cyan-400">${o.target}</span></p>
                         <div class="flex justify-between items-center text-[10px] text-slate-400 pt-1 border-t border-slate-700/50">
-                            <span>Maliyet: ${o.cost} 💎</span>
+                            <span>${o.cost > 0 ? 'Maliyet: ' + o.cost + ' 💎' : 'Ödeme Bildirimi'}</span>
                             <span>${o.date}</span>
                         </div>
                     </div>
