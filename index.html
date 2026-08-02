@@ -88,14 +88,13 @@
 
     <!-- Ana İçerik Alanı -->
     <main class="flex-1 max-w-md w-full mx-auto p-4">
-        <!-- 1. GÖREVLER TAB -->
+        <!-- 1. DUYURULAR / BİLGİLENDİRME TAB -->
         <div id="tab-tasks" class="tab-content space-y-4">
             <div class="bg-gradient-to-r from-cyan-600 to-blue-700 rounded-2xl p-5 shadow-xl relative overflow-hidden">
                 <div class="relative z-10">
-                    <span class="bg-white/20 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">Günlük Etkinlik</span>
-                    <h3 class="text-xl font-bold text-white mt-2">Bonus Elmas Kazan</h3>
-                    <p class="text-cyan-100 text-xs mt-1 mb-4">Görevleri tamamla, ücretsiz elmasların sahibi ol.</p>
-                    <button onclick="claimDailyTask()" class="bg-white text-blue-900 text-xs font-bold px-4 py-2.5 rounded-xl shadow-md active:scale-95 transition-transform">Ödülü Al (+50 Elmas)</button>
+                    <span class="bg-white/20 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">Hoş Geldiniz</span>
+                    <h3 class="text-xl font-bold text-white mt-2">SekoGram Paneline Hoş Geldiniz</h3>
+                    <p class="text-cyan-100 text-xs mt-1 mb-3">En kaliteli ve hızlı sosyal medya hizmetleri için doğru adrestesiniz. Bakiye yükleyerek sipariş vermeye başlayabilirsiniz.</p>
                 </div>
             </div>
         </div>
@@ -115,6 +114,18 @@
                     <input type="number" id="orderCount" placeholder="Miktar (Örn: 100)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
                     <button onclick="createOrder()" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-bold rounded-xl transition-colors">Sipariş Ver</button>
                 </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col space-y-3">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-[10px] bg-pink-500/10 text-pink-400 font-semibold px-2 py-0.5 rounded">Instagram</span>
+                            <h4 class="text-sm font-bold text-white mt-1">Gönderi Beğeni (1k = 115 TL / 50 Elmas)</h4>
+                        </div>
+                    </div>
+                    <input type="text" id="orderLink2" placeholder="Gönderi Linki" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                    <input type="number" id="orderCount2" placeholder="Miktar (Örn: 100)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                    <button onclick="createOrderCustom('Beğeni', 2)" class="w-full py-2.5 bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold rounded-xl transition-colors">Sipariş Ver</button>
+                </div>
             </div>
         </div>
 
@@ -124,10 +135,10 @@
                 <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-2xl mx-auto flex items-center justify-center text-xl">
                     <i class="fa-solid fa-wallet"></i>
                 </div>
-                <h3 class="text-lg font-bold text-white">Bakiye Yükleme (İban / Havale)</h3>
+                <h3 class="text-lg font-bold text-white">Bakiye Yükleme (Havale / EFT)</h3>
                 <p class="text-slate-400 text-xs">Minimum yatırım tutarı 250 TL'dir. (1 Elmas = 2.3 TL)</p>
                 <div class="bg-slate-800/80 p-3 rounded-xl text-left space-y-1 text-xs text-slate-300 border border-slate-700">
-                    <p><b>Banka:</b> Papara / Ziraat Bankası</p>
+                    <p><b>Banka:</b> Ziraat Bankası / Banka Havalesi</p>
                     <p><b>İban:</b> TR33 0001 0002 3456 7890 1234 56</p>
                     <p><b>Alıcı:</b> Şehmus Ayyıldız</p>
                 </div>
@@ -166,7 +177,7 @@
                     <i class="fa-solid fa-users"></i>
                 </div>
                 <h3 class="text-lg font-bold text-white">Arkadaşını Davet Et Kazan</h3>
-                <p class="text-slate-400 text-xs">Özel referans linkinle arkadaşların kayıt olsun, her yatırımdan komisyon kazan.</p>
+                <p class="text-slate-400 text-xs">Özel referans linkinle arkadaşların kayıt olsun, komisyon kazan.</p>
                 <div class="bg-slate-800 p-3 rounded-xl flex items-center justify-between border border-slate-700">
                     <span id="refLinkText" class="text-xs text-slate-300 truncate mr-2">https://sekogram.app?ref=user</span>
                     <button onclick="copyRefLink()" class="bg-cyan-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">Kopyala</button>
@@ -179,8 +190,8 @@
     <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-slate-800 z-30 px-2 py-2">
         <div class="max-w-md mx-auto grid grid-cols-6 gap-1 text-center">
             <button onclick="switchTab('tasks')" class="nav-btn text-cyan-400 py-1 rounded-xl flex flex-col items-center justify-center transition-colors" data-tab="tasks">
-                <i class="fa-solid fa-list-check text-base"></i>
-                <span class="text-[9px] mt-1 font-medium">Görevler</span>
+                <i class="fa-solid fa-house text-base"></i>
+                <span class="text-[9px] mt-1 font-medium">Ana Sayfa</span>
             </button>
             <button onclick="switchTab('services')" class="nav-btn text-slate-400 py-1 rounded-xl flex flex-col items-center justify-center transition-colors" data-tab="services">
                 <i class="fa-solid fa-layer-group text-base"></i>
@@ -216,7 +227,7 @@
             <!-- Admin Giriş PIN Bölümü -->
             <div id="adminLoginSection" class="space-y-4 py-8 text-center">
                 <p class="text-slate-400 text-xs">Yönetici paneline erişmek için PIN kodunu girin:</p>
-                <input type="password" id="adminPinInput" placeholder="Admin PIN (Örn: 1453)" class="w-full max-w-xs mx-auto bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-center tracking-widest focus:outline-none focus:border-cyan-500">
+                <input type="password" id="adminPinInput" placeholder="Yönetici PIN" class="w-full max-w-xs mx-auto bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-center tracking-widest focus:outline-none focus:border-cyan-500">
                 <button onclick="verifyAdminPin()" class="px-6 py-2.5 bg-cyan-500 text-white rounded-xl text-xs font-bold">Giriş Yap</button>
             </div>
 
@@ -251,8 +262,7 @@
     </div>
 
     <script>
-        // Merkezi Bulut Senkronizasyon Veri Yapısı (LocalStorage Tabanlı Anlık Paylaşımlı Veri)
-        const DB_KEY = "sekogram_global_db_v2";
+        const DB_KEY = "sekogram_global_db_v3";
 
         function getDB() {
             let db = localStorage.getItem(DB_KEY);
@@ -270,7 +280,6 @@
 
         let currentUser = null;
 
-        // Sayfa Yüklenme Kontrolü
         window.onload = function() {
             setTimeout(() => {
                 document.getElementById('trafficModal').classList.remove('hidden');
@@ -301,10 +310,9 @@
 
             let db = getDB();
             if (!db.users[username]) {
-                // Yeni kayıt (100 elmas hoşgeldin bonusu)
                 db.users[username] = {
                     password: pass,
-                    balance: 100,
+                    balance: 0,
                     banned: false,
                     joined: new Date().toLocaleDateString()
                 };
@@ -338,13 +346,12 @@
             document.getElementById('authScreen').classList.add('hidden');
             document.getElementById('headerUsername').innerText = currentUser;
             document.getElementById('headerBalance').innerText = userObj.balance;
-            document.getElementById('refLinkText').innerText = `https://sekogram-mini-app.vercel.app/?ref=${currentUser}`;
+            document.getElementById('refLinkText').innerText = `https://sekogram.app/?ref=${currentUser}`;
 
             renderOrders();
             renderSupportChat();
         }
 
-        // Tab Değiştirme Fonksiyonu
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
@@ -357,16 +364,6 @@
             event.currentTarget.classList.add('text-cyan-400');
         }
 
-        // Günlük Görev Ödülü
-        function claimDailyTask() {
-            let db = getDB();
-            db.users[currentUser].balance += 50;
-            saveDB(db);
-            checkUserStatus();
-            alert("Tebrikler! 50 Elmas hesabınıza eklendi.");
-        }
-
-        // Sipariş Oluşturma
         function createOrder() {
             let link = document.getElementById('orderLink').value.trim();
             let count = parseInt(document.getElementById('orderCount').value);
@@ -376,7 +373,7 @@
                 return;
             }
 
-            let cost = Math.ceil(count / 10); // 10 miktar = 1 elmas maliyet orantısı
+            let cost = Math.ceil(count / 10);
             let db = getDB();
 
             if (db.users[currentUser].balance < cost) {
@@ -388,6 +385,7 @@
             db.orders.push({
                 id: Date.now(),
                 user: currentUser,
+                serviceName: "Türk Gerçek Takipçi",
                 link: link,
                 count: count,
                 status: "İşleniyor (1-8 Saat)"
@@ -400,7 +398,40 @@
             document.getElementById('orderCount').value = '';
         }
 
-        // Siparişleri Listeleme
+        function createOrderCustom(serviceName, rateDivisor) {
+            let link = document.getElementById('orderLink2').value.trim();
+            let count = parseInt(document.getElementById('orderCount2').value);
+
+            if (!link || !count || count <= 0) {
+                alert("Lütfen geçerli bir link ve miktar girin!");
+                return;
+            }
+
+            let cost = Math.ceil(count / rateDivisor);
+            let db = getDB();
+
+            if (db.users[currentUser].balance < cost) {
+                alert("Yetersiz elmas bakiye!");
+                return;
+            }
+
+            db.users[currentUser].balance -= cost;
+            db.orders.push({
+                id: Date.now(),
+                user: currentUser,
+                serviceName: serviceName,
+                link: link,
+                count: count,
+                status: "İşleniyor (1-8 Saat)"
+            });
+
+            saveDB(db);
+            checkUserStatus();
+            alert("Siparişiniz başarıyla alındı!");
+            document.getElementById('orderLink2').value = '';
+            document.getElementById('orderCount2').value = '';
+        }
+
         function renderOrders() {
             let db = getDB();
             let listEl = document.getElementById('ordersList');
@@ -414,15 +445,15 @@
             listEl.innerHTML = userOrders.map(o => `
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex justify-between items-center text-xs">
                     <div>
-                        <p class="text-white font-medium truncate max-w-[180px]">${o.link}</p>
-                        <span class="text-[10px] text-slate-400">Adet: ${o.count}</span>
+                        <p class="text-white font-bold">${o.serviceName}</p>
+                        <p class="text-slate-400 font-medium truncate max-w-[160px]">${o.link}</p>
+                        <span class="text-[10px] text-slate-500">Adet: ${o.count}</span>
                     </div>
                     <span class="bg-amber-500/10 text-amber-400 font-semibold px-2 py-1 rounded-lg text-[10px]">${o.status}</span>
                 </div>
             `).join('');
         }
 
-        // Bakiye Bildirimi
         function submitDeposit() {
             let tx = document.getElementById('depositTxId').value.trim();
             let amount = document.getElementById('depositAmount').value.trim();
@@ -440,7 +471,6 @@
             document.getElementById('depositAmount').value = '';
         }
 
-        // Destek Mesajlaşması
         function sendSupportMessage() {
             let msg = document.getElementById('supportInput').value.trim();
             if (!msg) return;
@@ -476,7 +506,6 @@
             alert("Referans linki kopyalandı!");
         }
 
-        // Admin Paneli Fonksiyonları
         function openAdminModal() {
             document.getElementById('adminModal').classList.remove('hidden');
         }
@@ -492,7 +521,7 @@
                 document.getElementById('adminDashboard').classList.remove('hidden');
                 loadAdminData();
             } else {
-                alert("Hatalı Admin PIN!");
+                alert("Hatalı PIN!");
             }
         }
 
@@ -501,7 +530,6 @@
             document.getElementById('adminStatUsers').innerText = Object.keys(db.users).length;
             document.getElementById('adminStatOrders').innerText = db.orders.length;
 
-            // Kullanıcıları ve Banlama Paneli
             let usersListEl = document.getElementById('adminUsersList');
             usersListEl.innerHTML = Object.keys(db.users).map(uname => {
                 let u = db.users[uname];
@@ -510,16 +538,16 @@
                         <div>
                             <span class="text-white font-bold">${uname}</span>
                             <span class="text-cyan-400 ml-2">(${u.balance} Elmas)</span>
+                            <p class="text-[9px] text-slate-400">Kayıt: ${u.joined || 'Bilinmiyor'}</p>
                         </div>
                         <div class="flex space-x-1">
                             <button onclick="adminAdjustBalance('${uname}')" class="bg-blue-600 px-2 py-1 rounded text-white font-bold">Bakiye</button>
-                            <button onclick="adminToggleBan('${uname}')" class="bg-${u.banned ? 'emerald' : 'red'}-600 px-2 py-1 rounded text-white font-bold">${u.banned ? 'Aktif Et' : 'Banla'}</button>
+                            <button onclick="adminToggleBan('${uname}')" class="bg-${u.banned ? 'emerald' : 'red'}-600 px-2 py-1 rounded text-white font-bold">${u.banned ? 'Aç' : 'Banla'}</button>
                         </div>
                     </div>
                 `;
             }).join('');
 
-            // Destek Talepleri Paneli
             let supportListEl = document.getElementById('adminSupportList');
             supportListEl.innerHTML = db.support.map((sup, index) => `
                 <div class="bg-slate-800 p-2.5 rounded-xl space-y-1 text-xs">
@@ -561,7 +589,6 @@
             loadAdminData();
         }
 
-        // Gerçek zamanlı ortak veri dinleme (Sekmeler arası senkronizasyon için)
         window.addEventListener('storage', () => {
             if (currentUser) {
                 checkUserStatus();
