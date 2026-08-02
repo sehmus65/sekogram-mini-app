@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase SDK (Compat Versiyonu - Tek Dosya İçin En Kolay) -->
+    <!-- Firebase SDK Compat Versiyonu -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
@@ -134,7 +134,7 @@
             </div>
             <div class="space-y-3">
                 <div class="glass-panel rounded-2xl p-4 flex flex-col space-y-3">
-                    <h4 class="text-xs font-bold text-white">Türk Gerçek Takipçi (100 Elmas)</h4>
+                    <h4 class="text-xs font-bold text-white">Türk Gerçek Takipçi (10 Elmas)</h4>
                     <input type="text" id="link_s1" placeholder="Profil Linki" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white">
                     <input type="number" id="count_s1" placeholder="Miktar (Örn: 1000)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white">
                     <button onclick="orderService('Türk Takipçi', 'link_s1', 'count_s1', 10)" class="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold rounded-xl">Sipariş Ver</button>
@@ -221,7 +221,6 @@
     </div>
 
     <script>
-        // Firebase Bağlantı Bilgilerin
         const firebaseConfig = {
             apiKey: "AIzaSyDoA5GzwkeR-goeg8gDtb2cZ3t5iLp-UXg",
             authDomain: "sekogram-db.firebaseapp.com",
@@ -240,7 +239,6 @@
         let currentUser = null;
         let globalData = { users: {}, orders: {}, deposits: {}, support: {} };
 
-        // Firebase Verilerini Canlı Dinle (Realtime Sync)
         db.ref('/').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
