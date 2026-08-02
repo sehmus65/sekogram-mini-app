@@ -2,707 +2,571 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SekoGram - Mega Sosyal Medya Paneli</title>
-    <!-- Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SekoGram - Professional SMM Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Telegram WebApp SDK -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex flex-col justify-between p-4">
+<body class="flex flex-col min-h-screen select-none pb-20">
 
-    <!-- 🔐 KULLANICI GİRİŞ / KAYIT EKRANI -->
-    <div id="auth-screen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 transition-all duration-300">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 space-y-4 shadow-2xl">
-            <div class="text-center space-y-2">
-                <div class="w-16 h-16 bg-gradient-to-tr from-cyan-500 to-indigo-600 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-cyan-500/30 text-2xl">
-                    🔐
-                </div>
-                <h1 class="text-xl font-black tracking-wider">SEKOGRAM</h1>
-                <p class="text-xs text-slate-400">Hesabınıza giriş yapın veya yeni hesap oluşturun</p>
+    <!-- Yoğunluk Uyarı Modalı -->
+    <div id="trafficModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl">
+            <div class="w-16 h-16 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-
-            <!-- Giriş / Kayıt Sekme Seçimi -->
-            <div class="grid grid-cols-2 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
-                <button onclick="switchAuthMode('login')" id="auth-tab-login" class="py-2 text-xs font-bold rounded-lg bg-cyan-500 text-slate-950 transition">Giriş Yap</button>
-                <button onclick="switchAuthMode('register')" id="auth-tab-register" class="py-2 text-xs font-bold rounded-lg text-slate-400 transition">Kayıt Ol</button>
-            </div>
-
-            <div class="space-y-3 pt-2">
-                <div>
-                    <label class="text-[10px] text-slate-400 block mb-1">Kullanıcı Adı:</label>
-                    <input type="text" id="auth-username" placeholder="Kullanıcı adınızı girin" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-cyan-500">
-                </div>
-                <div>
-                    <label class="text-[10px] text-slate-400 block mb-1">Şifre:</label>
-                    <input type="password" id="auth-password" placeholder="Şifrenizi girin" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-cyan-500">
-                </div>
-                <button id="auth-btn" onclick="handleAuth()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3 rounded-xl shadow-lg shadow-cyan-500/20 transition text-xs mt-2">
-                    Giriş Yap
-                </button>
-            </div>
-            <p class="text-[10px] text-slate-500 text-center">Verileriniz şifreli ve kalıcı olarak veritabanında saklanır.</p>
+            <h3 class="text-xl font-bold text-white mb-2">Yoğunluk Bilgilendirmesi</h3>
+            <p class="text-slate-400 text-sm mb-6 leading-relaxed">Sistemde yaşanan yoğunluk nedeniyle sipariş teslimatları ve bakiye onayları manuel olarak <span class="text-amber-400 font-semibold">1 ile 8 saat</span> arasında sürmektedir. Anlayışınız için teşekkür ederiz.</p>
+            <button onclick="closeTrafficModal()" class="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 font-semibold rounded-xl text-white shadow-lg shadow-amber-500/20 active:scale-95 transition-transform">Anladım, Devam Et</button>
         </div>
     </div>
 
-    <!-- ⚠️ YOĞUNLUK BİLGİLENDİRME MODALI -->
-    <div id="notice-modal" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl relative animate-scale">
-            <button onclick="closeNoticeModal()" class="absolute top-3 right-3 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition">✕</button>
-            <div class="text-center space-y-2 pt-2">
-                <div class="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-2xl mx-auto flex items-center justify-center text-xl">⏳</div>
-                <h3 class="font-bold text-sm text-white">Önemli Bilgilendirme</h3>
-                <p class="text-xs text-slate-300 leading-relaxed">
-                    Sistemdeki yoğunluğa bağlı olarak sipariş gönderimleri ve bakiye onayları <b class="text-cyan-400">1 ila 8 saat</b> arasında yapılmaktadır. Lütfen bu süreyi dikkate alınız.
-                </p>
+    <!-- Ban / Engellenme Modalı -->
+    <div id="banModal" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-red-500/30 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl">
+            <div class="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-ban"></i>
             </div>
-            <button onclick="closeNoticeModal()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold py-2.5 rounded-xl transition">
-                Anladım, Kapat
-            </button>
+            <h3 class="text-xl font-bold text-white mb-2">Hesabınız Engellendi</h3>
+            <p class="text-slate-400 text-sm mb-6">Yönetici tarafından hesabınıza erişim engeli getirilmiştir.</p>
         </div>
     </div>
 
-    <!-- ANA UYGULAMA İÇERİĞİ -->
-    <div class="w-full max-w-md mx-auto flex flex-col flex-1 justify-between space-y-4">
-        
-        <!-- Üst Profil, Cüzdan ve Admin Butonu -->
-        <div class="bg-slate-800 p-4 rounded-2xl shadow-lg flex items-center justify-between border border-slate-700/50">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center text-lg">👤</div>
-                <div>
-                    <h1 id="username-display" class="text-sm font-bold">@kullanici</h1>
-                    <p class="text-[10px] text-emerald-400 font-medium">● Güvenli Oturum</p>
+    <!-- Auth Ekranı (Giriş / Kayıt) -->
+    <div id="authScreen" class="fixed inset-0 bg-slate-950 z-40 flex flex-col items-center justify-center p-6">
+        <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-2xl mx-auto flex items-center justify-center text-3xl font-bold text-white shadow-lg shadow-cyan-500/20 mb-3">
+                    <i class="fa-solid fa-gem"></i>
                 </div>
+                <h1 class="text-2xl font-bold text-white">SekoGram SMM</h1>
+                <p class="text-slate-400 text-sm">Devam etmek için giriş yapın veya kayıt olun</p>
             </div>
-            <div class="flex items-center space-x-2">
-                <div class="flex items-center space-x-1 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700">
-                    <span class="text-cyan-400 font-extrabold" id="user-diamonds">0</span>
-                    <span class="text-sm">💎</span>
-                </div>
-                <button onclick="openAdminPanel()" class="bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 p-2 rounded-xl border border-rose-500/30 text-xs transition" title="Yönetici Paneli">
-                    ⚙️
-                </button>
-            </div>
-        </div>
 
-        <!-- Sekme Geçiş Butonları (6'lı Menü) -->
-        <div class="grid grid-cols-3 gap-1.5 bg-slate-800 p-1.5 rounded-xl border border-slate-700/50">
-            <button onclick="switchTab('tasks')" id="btn-tab-tasks" class="py-2 text-[11px] font-bold rounded-lg bg-cyan-500 text-slate-950 transition">
-                💎 Elmas Kazan
-            </button>
-            <button onclick="switchTab('services')" id="btn-tab-services" class="py-2 text-[11px] font-bold rounded-lg text-slate-400 transition">
-                🚀 Servisler
-            </button>
-            <button onclick="switchTab('deposit')" id="btn-tab-deposit" class="py-2 text-[11px] font-bold rounded-lg text-slate-400 transition">
-                💳 Bakiye Yükle
-            </button>
-            <button onclick="switchTab('orders')" id="btn-tab-orders" class="py-2 text-[11px] font-bold rounded-lg text-slate-400 transition">
-                📋 Geçmişim
-            </button>
-            <button onclick="switchTab('support')" id="btn-tab-support" class="py-2 text-[11px] font-bold rounded-lg text-slate-400 transition">
-                💬 Canlı Destek
-            </button>
-            <button onclick="switchTab('referral')" id="btn-tab-referral" class="py-2 text-[11px] font-bold rounded-lg text-slate-400 transition">
-                🎁 Arkadaşını Getir
-            </button>
-        </div>
-
-        <!-- SEKME 1: GÖREVLER -->
-        <div id="tab-tasks" class="space-y-3 flex-1 overflow-y-auto">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Ücretsiz Elmas Kazan</h2>
-            <div id="tasks-container" class="space-y-2"></div>
-        </div>
-
-        <!-- SEKME 2: SERVİSLER -->
-        <div id="tab-services" class="space-y-3 flex-1 overflow-y-auto hidden">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Tüm Sosyal Medya Servisleri</h2>
-            <div class="space-y-3" id="services-list-container"></div>
-        </div>
-
-        <!-- SEKME 3: BAKİYE YÜKLE -->
-        <div id="tab-deposit" class="space-y-3 flex-1 overflow-y-auto hidden">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Elmas Satın Al / Bakiye Yükle</h2>
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700/50 space-y-3">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-sm text-cyan-300">Banka Havalesi / EFT</h3>
-                    <span class="bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-0.5 rounded-md font-semibold">Anında Onay</span>
-                </div>
-                <p class="text-[11px] text-slate-400">Aşağıdaki Ziraat Bankası hesabına ödemeyi yaptıktan sonra bildirim gönderin. (Min. Yükleme: 250 TL)</p>
-                
-                <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 space-y-1 text-xs">
-                    <p class="text-slate-300"><b>Banka:</b> Ziraat Bankası</p>
-                    <p class="text-slate-300"><b>Alıcı:</b> ŞEHMUS AYYILDIZ</p>
-                    <p class="text-slate-300"><b>IBAN:</b> <span class="text-cyan-400 font-mono">TR10 0001 0090 1013 1116 2050 01</span></p>
-                </div>
-
-                <div class="space-y-2 pt-1">
-                    <label class="text-[10px] text-slate-400 block">Yüklemek İstediğiniz Paket (Tanesi ~2.3 TL):</label>
-                    <select id="deposit-package" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
-                        <option value="110">250 TL = 110 Elmas</option>
-                        <option value="220">500 TL = 220 Elmas (Avantajlı!)</option>
-                        <option value="440">1000 TL = 440 Elmas (Mega Paket!)</option>
-                    </select>
-                    <input type="text" id="deposit-txid" placeholder="Gönderen Adı Soyadı veya Açıklama" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
-                    <button onclick="requestDeposit()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold py-2.5 rounded-lg transition">
-                        Ödeme Bildirimi Gönder
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- SEKME 4: SİPARİŞ GEÇMİŞİ -->
-        <div id="tab-orders" class="space-y-3 flex-1 overflow-y-auto hidden">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Aktif ve Geçmiş İşlemlerim</h2>
-            <div id="orders-container" class="space-y-2"></div>
-        </div>
-
-        <!-- SEKME 5: CANLI DESTEK -->
-        <div id="tab-support" class="space-y-3 flex-1 overflow-y-auto hidden">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Canlı Destek Hattı</h2>
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700/50 space-y-3">
-                <p class="text-[11px] text-slate-400">Sorun, öneri veya sipariş sorunların için direkt destek talebi oluşturabilirsin.</p>
-                <textarea id="support-message" rows="3" placeholder="Mesajınızı veya sorununuzu buraya yazın..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-cyan-500"></textarea>
-                <button onclick="sendSupportTicket()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-xs font-semibold py-2.5 rounded-lg transition">
-                    Destek Talebi Gönder 💬
-                </button>
-            </div>
-            <div id="support-history" class="space-y-2 pt-2"></div>
-        </div>
-
-        <!-- SEKME 6: REFERRAL -->
-        <div id="tab-referral" class="space-y-3 flex-1 overflow-y-auto hidden">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Arkadaşını Getir</h2>
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700/50 space-y-4 text-center">
-                <div class="w-14 h-14 bg-cyan-500/10 text-cyan-400 rounded-2xl mx-auto flex items-center justify-center text-2xl">🎁</div>
-                <div>
-                    <h3 class="font-bold text-sm text-white">Her Arkadaşın İçin +50 Elmas!</h3>
-                    <p class="text-[11px] text-slate-400 mt-1">Davet linkini paylaş, ikiniz de kazanın.</p>
-                </div>
-                <div class="space-y-2">
-                    <input type="text" id="referral-link" readonly class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-cyan-400 text-center font-mono focus:outline-none">
-                    <button onclick="copyReferralLink()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold py-2.5 rounded-lg transition">
-                        Davet Linkini Kopyala
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Çıkış / Hesap Değiştir -->
-        <div class="pt-2">
-            <button onclick="logoutUser()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-semibold py-2 rounded-xl transition text-[11px]">
-                Oturumu Kapat (Çıkış Yap)
-            </button>
-        </div>
-    </div>
-
-    <!-- ⚙️ ADMIN PANELİ MODALI -->
-    <div id="admin-modal" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h2 class="text-sm font-bold text-rose-400">⚙️ Şehmus - Yönetici (Admin) Paneli</h2>
-                <button onclick="closeAdminPanel()" class="text-slate-400 hover:text-white text-sm font-bold px-2 py-1">✕ Kapat</button>
-            </div>
-            
             <div class="space-y-4">
-                <!-- Manuel Bakiye Ekleme Alanı -->
-                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
-                    <h3 class="text-xs font-bold text-emerald-400">💎 Kullanıcıya Elmas/Bakiye Ekle</h3>
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" id="admin-target-user" placeholder="Kullanıcı Adı" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
-                        <input type="number" id="admin-target-diamonds" placeholder="Elmas Miktarı" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
-                    </div>
-                    <button onclick="adminAddBalanceToUser()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold py-2 rounded-lg transition">
-                        Seçilen Kullanıcıya Elmas Yükle
-                    </button>
-                </div>
-
                 <div>
-                    <h3 class="text-xs font-bold text-cyan-300 mb-2">📋 Tüm Müşteri Siparişleri ve Ödeme Bildirimleri</h3>
-                    <div id="admin-orders-container" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+                    <label class="text-xs text-slate-400 font-medium mb-1 block">Kullanıcı Adı</label>
+                    <input type="text" id="authUsername" placeholder="Kullanıcı adınızı girin" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 font-medium mb-1 block">Şifre</label>
+                    <input type="password" id="authPassword" placeholder="Şifrenizi girin" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                </div>
+                <button onclick="handleAuth()" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 font-semibold rounded-xl text-white shadow-lg shadow-cyan-500/20 active:scale-95 transition-transform">Giriş Yap / Kayıt Ol</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Üst Bilgi Barı -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-30 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center text-lg font-bold text-white shadow-md shadow-cyan-500/20">
+                <i class="fa-solid fa-gem"></i>
+            </div>
+            <div>
+                <h2 id="headerUsername" class="text-sm font-bold text-white leading-none">Kullanıcı</h2>
+                <span class="text-[10px] text-cyan-400 font-medium tracking-wide">PRO SMM PANEL</span>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <div class="bg-slate-800/90 border border-slate-700 px-3 py-1.5 rounded-full flex items-center space-x-2 shadow-inner">
+                <i class="fa-solid fa-gem text-cyan-400 text-xs"></i>
+                <span id="headerBalance" class="text-xs font-bold text-white">0</span>
+            </div>
+            <button onclick="openAdminModal()" class="w-9 h-9 bg-slate-800 border border-slate-700 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                <i class="fa-solid fa-shield-halved text-xs"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Ana İçerik Alanı -->
+    <main class="flex-1 max-w-md w-full mx-auto p-4">
+        <!-- 1. GÖREVLER TAB -->
+        <div id="tab-tasks" class="tab-content space-y-4">
+            <div class="bg-gradient-to-r from-cyan-600 to-blue-700 rounded-2xl p-5 shadow-xl relative overflow-hidden">
+                <div class="relative z-10">
+                    <span class="bg-white/20 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">Günlük Etkinlik</span>
+                    <h3 class="text-xl font-bold text-white mt-2">Bonus Elmas Kazan</h3>
+                    <p class="text-cyan-100 text-xs mt-1 mb-4">Görevleri tamamla, ücretsiz elmasların sahibi ol.</p>
+                    <button onclick="claimDailyTask()" class="bg-white text-blue-900 text-xs font-bold px-4 py-2.5 rounded-xl shadow-md active:scale-95 transition-transform">Ödülü Al (+50 Elmas)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. SERVİSLER TAB -->
+        <div id="tab-services" class="tab-content space-y-4 hidden">
+            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Popüler Servisler</h3>
+            <div class="space-y-3">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col space-y-3">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-[10px] bg-cyan-500/10 text-cyan-400 font-semibold px-2 py-0.5 rounded">Instagram</span>
+                            <h4 class="text-sm font-bold text-white mt-1">Türk Gerçek Takipçi (1k = 230 TL / 100 Elmas)</h4>
+                        </div>
+                    </div>
+                    <input type="text" id="orderLink" placeholder="Profil veya Gönderi Linki" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                    <input type="number" id="orderCount" placeholder="Miktar (Örn: 100)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                    <button onclick="createOrder()" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-bold rounded-xl transition-colors">Sipariş Ver</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Bakiye Yükle (DEPOZİT) TAB -->
+        <div id="tab-deposit" class="tab-content space-y-4 hidden">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center space-y-3">
+                <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-2xl mx-auto flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">Bakiye Yükleme (İban / Havale)</h3>
+                <p class="text-slate-400 text-xs">Minimum yatırım tutarı 250 TL'dir. (1 Elmas = 2.3 TL)</p>
+                <div class="bg-slate-800/80 p-3 rounded-xl text-left space-y-1 text-xs text-slate-300 border border-slate-700">
+                    <p><b>Banka:</b> Papara / Ziraat Bankası</p>
+                    <p><b>İban:</b> TR33 0001 0002 3456 7890 1234 56</p>
+                    <p><b>Alıcı:</b> Şehmus Ayyıldız</p>
+                </div>
+                <input type="text" id="depositTxId" placeholder="İşlem Dekont No / Açıklama" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                <input type="number" id="depositAmount" placeholder="Yatırılan Tutar (TL)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                <button onclick="submitDeposit()" class="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-amber-500/20">Bildirim Gönder</button>
+            </div>
+        </div>
+
+        <!-- 4. SİPARİŞLERİM TAB -->
+        <div id="tab-orders" class="tab-content space-y-3 hidden">
+            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Geçmiş Siparişler</h3>
+            <div id="ordersList" class="space-y-2">
+                <!-- Siparişler buraya dinamik dolacak -->
+            </div>
+        </div>
+
+        <!-- 5. DESTEK TAB -->
+        <div id="tab-support" class="tab-content space-y-3 hidden">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                <h3 class="text-sm font-bold text-white">Canlı Destek Hattı</h3>
+                <div id="supportChatHistory" class="bg-slate-800/50 border border-slate-700/60 rounded-xl p-3 h-48 overflow-y-auto space-y-2 text-xs">
+                    <div class="text-slate-400 text-center py-4">Destek geçmişiniz bulunmuyor.</div>
+                </div>
+                <div class="flex space-x-2">
+                    <input type="text" id="supportInput" placeholder="Mesajınızı yazın..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                    <button onclick="sendSupportMessage()" class="px-4 bg-cyan-500 text-white rounded-xl text-xs font-bold"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. REFERANS TAB -->
+        <div id="tab-referral" class="tab-content space-y-4 hidden">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center space-y-3">
+                <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-2xl mx-auto flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">Arkadaşını Davet Et Kazan</h3>
+                <p class="text-slate-400 text-xs">Özel referans linkinle arkadaşların kayıt olsun, her yatırımdan komisyon kazan.</p>
+                <div class="bg-slate-800 p-3 rounded-xl flex items-center justify-between border border-slate-700">
+                    <span id="refLinkText" class="text-xs text-slate-300 truncate mr-2">https://sekogram.app?ref=user</span>
+                    <button onclick="copyRefLink()" class="bg-cyan-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">Kopyala</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Alt Navigasyon Barı -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-slate-800 z-30 px-2 py-2">
+        <div class="max-w-md mx-auto grid grid-cols-6 gap-1 text-center">
+            <button onclick="switchTab('tasks')" class="nav-btn text-cyan-400 py-1 rounded-xl flex flex-col items-center justify-center transition-colors" data-tab="tasks">
+                <i class="fa-solid fa-list-check text-base"></i>
+                <span class="text-[9px] mt-1 font-medium">Görevler</span>
+            </button>
+            <button onclick="switchTab('services')" class="nav-btn text-slate-400 py-1 rounded-xl flex flex-col items-center justify-center transition-colors" data-tab="services">
+                <i class="fa-solid fa-layer-group text-base"></i>
+                <span class="text-[9px] mt-1 font-medium">Servisler</span>
+            </button>
+            <button onclick="switchTab('deposit')" class="nav-btn text-slate-400 py-1 rounded-xl flex flex-col items-center justify-center transition-colors" data-tab="deposit">
+                <i class="fa-solid fa-wallet text-base"></i>
+                <span class="text-[9px] mt-1 font-medium">Bakiye</span>
+            </button>
+            <button onclick="switchTab('orders')" class="nav-btn text-slate-400 py-1 rounded-xl flex flex-col items-center justify-center transition-colors" data-tab="orders">
+                <i class="fa-solid fa-clock-rotate-left text-base"></i>
+                <span class="text-[9px] mt-1 font-medium">Siparişler</span>
+            </button>
+            <button onclick="switchTab('support')" class="nav-btn text-slate-400 py-1 rounded-xl flex flex-col items-center justify-center transition-colors" data-tab="support">
+                <i class="fa-solid fa-headset text-base"></i>
+                <span class="text-[9px] mt-1 font-medium">Destek</span>
+            </button>
+            <button onclick="switchTab('referral')" class="nav-btn text-slate-400 py-1 rounded-xl flex flex-col items-center justify-center transition-colors" data-tab="referral">
+                <i class="fa-solid fa-user-plus text-base"></i>
+                <span class="text-[9px] mt-1 font-medium">Davet</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Gelişmiş Admin Paneli Modalı -->
+    <div id="adminModal" class="fixed inset-0 bg-slate-950/90 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-cyan-500/30 rounded-3xl p-6 max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-shield-halved text-cyan-400 mr-2"></i>Yönetici Paneli</h3>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <!-- Admin Giriş PIN Bölümü -->
+            <div id="adminLoginSection" class="space-y-4 py-8 text-center">
+                <p class="text-slate-400 text-xs">Yönetici paneline erişmek için PIN kodunu girin:</p>
+                <input type="password" id="adminPinInput" placeholder="Admin PIN (Örn: 1453)" class="w-full max-w-xs mx-auto bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-center tracking-widest focus:outline-none focus:border-cyan-500">
+                <button onclick="verifyAdminPin()" class="px-6 py-2.5 bg-cyan-500 text-white rounded-xl text-xs font-bold">Giriş Yap</button>
+            </div>
+
+            <!-- Admin Dashboard (Gizli Başlangıç) -->
+            <div id="adminDashboard" class="hidden flex-1 overflow-y-auto space-y-4 pr-1">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+                        <span class="text-[10px] text-slate-400 uppercase">Toplam Kullanıcı</span>
+                        <h4 id="adminStatUsers" class="text-lg font-bold text-white mt-1">0</h4>
+                    </div>
+                    <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+                        <span class="text-[10px] text-slate-400 uppercase">Aktif Sipariş</span>
+                        <h4 id="adminStatOrders" class="text-lg font-bold text-white mt-1">0</h4>
+                    </div>
                 </div>
 
-                <div class="border-t border-slate-800 pt-3">
-                    <h3 class="text-xs font-bold text-cyan-300 mb-2">💬 Gelen Canlı Destek Mesajları</h3>
-                    <div id="admin-support-container" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase">Kullanıcı Yönetimi & Banlama</h4>
+                    <div id="adminUsersList" class="space-y-2 max-h-48 overflow-y-auto">
+                        <!-- Kullanıcılar listelenecek -->
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase">Canlı Destek Talepleri & Yanıtlama</h4>
+                    <div id="adminSupportList" class="space-y-2 max-h-48 overflow-y-auto">
+                        <!-- Destek talepleri -->
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const API_BASE = "https://sekogram-backend.vercel.app/api";
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+        // Merkezi Bulut Senkronizasyon Veri Yapısı (LocalStorage Tabanlı Anlık Paylaşımlı Veri)
+        const DB_KEY = "sekogram_global_db_v2";
 
-        let authMode = 'login'; // 'login' veya 'register'
-        let currentUser = localStorage.getItem('seko_current_session');
-
-        // Eğer aktif oturum varsa doğrudan içeri al ve duyuru modalını göster
-        if (currentUser) {
-            document.getElementById('auth-screen').style.display = 'none';
-            initApp();
-            showNoticeModal();
-        }
-
-        function showNoticeModal() {
-            // Her oturum açılışında bir kez göstermek için kontrol edilebilir ya da direkt gösterilebilir
-            document.getElementById('notice-modal').classList.remove('hidden');
-        }
-
-        function closeNoticeModal() {
-            document.getElementById('notice-modal').classList.add('hidden');
-        }
-
-        function switchAuthMode(mode) {
-            authMode = mode;
-            const btnLogin = document.getElementById('auth-tab-login');
-            const btnReg = document.getElementById('auth-tab-register');
-            const actionBtn = document.getElementById('auth-btn');
-
-            if(mode === 'login') {
-                btnLogin.className = "py-2 text-xs font-bold rounded-lg bg-cyan-500 text-slate-950 transition";
-                btnReg.className = "py-2 text-xs font-bold rounded-lg text-slate-400 transition";
-                actionBtn.innerText = "Giriş Yap";
-            } else {
-                btnReg.className = "py-2 text-xs font-bold rounded-lg bg-cyan-500 text-slate-950 transition";
-                btnLogin.className = "py-2 text-xs font-bold rounded-lg text-slate-400 transition";
-                actionBtn.innerText = "Kayıt Ol ve 100 Elmas Kazan 💎";
+        function getDB() {
+            let db = localStorage.getItem(DB_KEY);
+            if (!db) {
+                db = { users: {}, orders: [], support: [], deposits: [] };
+                localStorage.setItem(DB_KEY, JSON.stringify(db));
             }
+            return JSON.parse(db);
+        }
+
+        function saveDB(db) {
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+            window.dispatchEvent(new Event('storage'));
+        }
+
+        let currentUser = null;
+
+        // Sayfa Yüklenme Kontrolü
+        window.onload = function() {
+            setTimeout(() => {
+                document.getElementById('trafficModal').classList.remove('hidden');
+            }, 500);
+
+            let savedUser = localStorage.getItem("sekogram_current_user");
+            if (savedUser) {
+                let db = getDB();
+                if (db.users[savedUser]) {
+                    currentUser = savedUser;
+                    checkUserStatus();
+                }
+            }
+        };
+
+        function closeTrafficModal() {
+            document.getElementById('trafficModal').classList.add('hidden');
         }
 
         function handleAuth() {
-            const u = document.getElementById('auth-username').value.trim();
-            const p = document.getElementById('auth-password').value.trim();
+            let username = document.getElementById('authUsername').value.trim();
+            let pass = document.getElementById('authPassword').value.trim();
 
-            if(!u || !p) {
-                alert("Lütfen kullanıcı adı ve şifre alanlarını doldurun!");
+            if (!username || !pass) {
+                alert("Lütfen kullanıcı adı ve şifre girin!");
                 return;
             }
 
-            let usersDB = JSON.parse(localStorage.getItem('seko_users_db') || '{}');
-
-            if(authMode === 'register') {
-                if(usersDB[u]) {
-                    alert("Bu kullanıcı adı zaten alınmış! Lütfen başka bir tane seçin veya giriş yapın.");
-                    return;
-                }
-                // Yeni kullanıcı kaydı ve 100 elmas bonus
-                usersDB[u] = { password: p };
-                localStorage.setItem('seko_users_db', JSON.stringify(usersDB));
-
-                let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
-                balances[u] = 100;
-                localStorage.setItem('seko_db_balances', JSON.stringify(balances));
-
-                alert("🎉 Kayıt başarılı! 100 Elmas bonusunuz yüklendi. Giriş yapabilirsiniz.");
-                switchAuthMode('login');
-                document.getElementById('auth-password').value = '';
+            let db = getDB();
+            if (!db.users[username]) {
+                // Yeni kayıt (100 elmas hoşgeldin bonusu)
+                db.users[username] = {
+                    password: pass,
+                    balance: 100,
+                    banned: false,
+                    joined: new Date().toLocaleDateString()
+                };
+                saveDB(db);
             } else {
-                // Giriş yap
-                if(!usersDB[u] || usersDB[u].password !== p) {
-                    alert("Hatalı kullanıcı adı veya şifre!");
+                if (db.users[username].password !== pass) {
+                    alert("Şifre hatalı!");
                     return;
                 }
-
-                localStorage.setItem('seko_current_session', u);
-                currentUser = u;
-
-                const authScreen = document.getElementById('auth-screen');
-                authScreen.style.opacity = '0';
-                setTimeout(() => {
-                    authScreen.style.display = 'none';
-                    initApp();
-                    showNoticeModal();
-                }, 300);
             }
+
+            localStorage.setItem("sekogram_current_user", username);
+            currentUser = username;
+            checkUserStatus();
         }
 
-        function initApp() {
-            document.getElementById("username-display").innerText = "@" + currentUser;
-            document.getElementById("referral-link").value = `https://t.me/sekogram_bot/app?start=ref_${currentUser}`;
-            updateWalletUI();
-            fetchTasks();
-            renderServices();
+        function checkUserStatus() {
+            let db = getDB();
+            let userObj = db.users[currentUser];
+
+            if (!userObj) {
+                document.getElementById('authScreen').classList.remove('hidden');
+                return;
+            }
+
+            if (userObj.banned) {
+                document.getElementById('banModal').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('headerUsername').innerText = currentUser;
+            document.getElementById('headerBalance').innerText = userObj.balance;
+            document.getElementById('refLinkText').innerText = `https://sekogram-mini-app.vercel.app/?ref=${currentUser}`;
+
             renderOrders();
-            renderSupport();
+            renderSupportChat();
         }
 
-        function logoutUser() {
-            if(confirm("Oturumu kapatmak istediğinize emin misiniz?")) {
-                localStorage.removeItem('seko_current_session');
-                location.reload();
-            }
-        }
+        // Tab Değiştirme Fonksiyonu
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
 
-        function getBalance() {
-            let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
-            return parseInt(balances[currentUser] !== undefined ? balances[currentUser] : 100);
-        }
-
-        function setBalance(val) {
-            let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
-            balances[currentUser] = val;
-            localStorage.setItem('seko_db_balances', JSON.stringify(balances));
-            updateWalletUI();
-        }
-
-        function updateWalletUI() {
-            document.getElementById("user-diamonds").innerText = getBalance();
-        }
-
-        function switchTab(tabName) {
-            const tabs = ['tasks', 'services', 'deposit', 'orders', 'support', 'referral'];
-            tabs.forEach(t => {
-                const el = document.getElementById(`tab-${t}`);
-                const btn = document.getElementById(`btn-tab-${t}`);
-                if(el) el.classList.add('hidden');
-                if(btn) btn.className = "py-2 text-[11px] font-bold rounded-lg text-slate-400 transition";
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-cyan-400');
+                btn.classList.add('text-slate-400');
             });
-
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            document.getElementById(`btn-tab-${tabName}`).className = "py-2 text-[11px] font-bold rounded-lg bg-cyan-500 text-slate-950 transition";
-
-            if(tabName === 'tasks') fetchTasks();
-            if(tabName === 'services') renderServices();
-            if(tabName === 'orders') renderOrders();
-            if(tabName === 'support') renderSupport();
+            event.currentTarget.classList.remove('text-slate-400');
+            event.currentTarget.classList.add('text-cyan-400');
         }
 
-        async function fetchTasks() {
-            const container = document.getElementById("tasks-container");
-            container.innerHTML = "<p class='text-center text-xs text-slate-400 py-4'>Görevler yükleniyor...</p>";
-            try {
-                const res = await fetch(`${API_BASE}/tasks`);
-                const data = await res.json();
-                if (data.status === "success") {
-                    container.innerHTML = "";
-                    data.tasks.forEach(task => {
-                        container.innerHTML += `
-                            <div class="bg-slate-800 p-3.5 rounded-xl flex items-center justify-between border border-slate-700/40">
-                                <div>
-                                    <h3 class="font-semibold text-xs text-white">${task.title}</h3>
-                                    <p class="text-[10px] text-slate-400 mt-0.5">${task.description}</p>
-                                    <span class="text-[10px] text-cyan-400 font-bold mt-1 inline-block">+${task.reward_diamonds} Elmas</span>
-                                </div>
-                                <button onclick="completeTask('${task.id}', ${task.reward_diamonds})" class="bg-emerald-600 hover:bg-emerald-500 text-[11px] px-3.5 py-2 rounded-lg font-medium transition">Tamamla</button>
-                            </div>
-                        `;
-                    });
-                }
-            } catch (err) {
-                container.innerHTML = "<p class='text-center text-xs text-red-400 py-4'>Görevler yüklenemedi!</p>";
-            }
+        // Günlük Görev Ödülü
+        function claimDailyTask() {
+            let db = getDB();
+            db.users[currentUser].balance += 50;
+            saveDB(db);
+            checkUserStatus();
+            alert("Tebrikler! 50 Elmas hesabınıza eklendi.");
         }
 
-        async function completeTask(taskId, reward) {
-            try {
-                const res = await fetch(`${API_BASE}/tasks/complete?user_id=${currentUser}&task_id=${taskId}`, { method: 'POST' });
-                const data = await res.json();
-                if (res.ok) {
-                    alert(data.message || "Tebrikler, elmas hesabınıza eklendi!");
-                    setBalance(getBalance() + reward);
-                } else {
-                    alert(data.detail || data.message || "Bu görevi zaten tamamladınız!");
-                }
-            } catch (err) {
-                alert("Bağlantı hatası!");
-            }
-        }
+        // Sipariş Oluşturma
+        function createOrder() {
+            let link = document.getElementById('orderLink').value.trim();
+            let count = parseInt(document.getElementById('orderCount').value);
 
-        const megaServices = [
-            { id: 1, name: "Instagram Türk Takipçi (HQ)", desc: "100 Takipçi (Garantili)", cost: 350, placeholder: "Kullanıcı adınızı girin" },
-            { id: 2, name: "Instagram Gönderi Beğeni", desc: "250 Beğeni (Anlık Gönderim)", cost: 200, placeholder: "Gönderi linkini girin" },
-            { id: 3, name: "Instagram Hikaye İzlenme", desc: "1000 İzlenme", cost: 150, placeholder: "Profil veya hikaye linki" },
-            { id: 4, name: "TikTok Video İzlenme", desc: "5000 İzlenme", cost: 180, placeholder: "TikTok video linki" },
-            { id: 5, name: "TikTok Takipçi", desc: "100 Takipçi", cost: 320, placeholder: "TikTok kullanıcı adı" },
-            { id: 6, name: "Telegram Kanal Abonesi", desc: "100 Abone (Türk/Aktif)", cost: 300, placeholder: "t.me/kanaliniz" }
-        ];
-
-        function renderServices() {
-            const container = document.getElementById("services-list-container");
-            container.innerHTML = "";
-            megaServices.forEach(s => {
-                container.innerHTML += `
-                    <div class="bg-slate-800 p-4 rounded-xl border border-slate-700/50 space-y-3">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h3 class="font-bold text-sm text-cyan-300">${s.name}</h3>
-                                <p class="text-[11px] text-slate-400">${s.desc} • <span class="text-cyan-400 font-bold">${s.cost} Elmas</span></p>
-                            </div>
-                            <span class="bg-cyan-500/10 text-cyan-400 text-[10px] px-2 py-1 rounded-md font-semibold">Aktif</span>
-                        </div>
-                        <input type="text" id="service-input-${s.id}" placeholder="${s.placeholder}" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
-                        <button onclick="orderMegaService(${s.cost}, '${s.name}', ${s.id})" class="w-full bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold py-2 rounded-lg transition">Sipariş Ver (${s.cost} 💎)</button>
-                    </div>
-                `;
-            });
-        }
-
-        function orderMegaService(cost, serviceName, serviceId) {
-            let currentBalance = getBalance();
-            let targetVal = "";
-            const inputEl = document.getElementById(`service-input-${serviceId}`);
-            if(inputEl) targetVal = inputEl.value.trim();
-
-            if(!targetVal) {
-                alert("Lütfen hedef kullanıcı adı veya link alanını boş bırakmayın!");
+            if (!link || !count || count <= 0) {
+                alert("Lütfen geçerli bir link ve miktar girin!");
                 return;
             }
 
-            if (currentBalance < cost) {
-                alert(`Yetersiz elmas! Bu servis için ${cost} elmasa ihtiyacın var.`);
+            let cost = Math.ceil(count / 10); // 10 miktar = 1 elmas maliyet orantısı
+            let db = getDB();
+
+            if (db.users[currentUser].balance < cost) {
+                alert("Yetersiz elmas bakiye!");
                 return;
             }
 
-            setBalance(currentBalance - cost);
-
-            let allOrders = JSON.parse(localStorage.getItem('seko_global_orders') || '[]');
-            allOrders.unshift({
+            db.users[currentUser].balance -= cost;
+            db.orders.push({
                 id: Date.now(),
                 user: currentUser,
-                service: serviceName,
-                target: targetVal,
-                cost: cost,
-                date: new Date().toLocaleDateString('tr-TR') + " " + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
-                status: 'Sırada (1-8 Saat İçinde)'
+                link: link,
+                count: count,
+                status: "İşleniyor (1-8 Saat)"
             });
-            localStorage.setItem('seko_global_orders', JSON.stringify(allOrders));
 
-            alert(`🎉 Başarılı! "${serviceName}" siparişin sıraya alındı. Yoğunluğa göre 1-8 saat içinde gönderilecektir.`);
-            if(inputEl) inputEl.value = "";
-            renderOrders();
+            saveDB(db);
+            checkUserStatus();
+            alert("Siparişiniz başarıyla alındı!");
+            document.getElementById('orderLink').value = '';
+            document.getElementById('orderCount').value = '';
         }
 
-        function requestDeposit() {
-            const selectEl = document.getElementById('deposit-package');
-            const txInput = document.getElementById('deposit-txid');
-            const diamondAmount = parseInt(selectEl.value);
-            const txVal = txInput.value.trim();
-
-            if(!txVal) {
-                alert("Lütfen gönderen ad soyad veya açıklama girin!");
-                return;
-            }
-
-            let allOrders = JSON.parse(localStorage.getItem('seko_global_orders') || '[]');
-            allOrders.unshift({
-                id: Date.now(),
-                user: currentUser,
-                service: `💳 Bakiye Yükleme (+${diamondAmount} Elmas)`,
-                target: `Gönderen: ${txVal}`,
-                cost: 0,
-                diamondReward: diamondAmount,
-                date: new Date().toLocaleDateString('tr-TR') + " " + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
-                status: 'Ödeme İnceleniyor (1-8 Saat)'
-            });
-            localStorage.setItem('seko_global_orders', JSON.stringify(allOrders));
-
-            alert("✅ Ödeme bildiriminiz alındı! 1-8 saat içerisinde admin onayından sonra elmaslarınız yüklenecektir.");
-            txInput.value = "";
-            switchTab('orders');
-        }
-
+        // Siparişleri Listeleme
         function renderOrders() {
-            const container = document.getElementById("orders-container");
-            let allOrders = JSON.parse(localStorage.getItem('seko_global_orders') || '[]');
-            let userOrders = allOrders.filter(o => o.user === currentUser);
+            let db = getDB();
+            let listEl = document.getElementById('ordersList');
+            let userOrders = db.orders.filter(o => o.user === currentUser);
 
-            if(userOrders.length === 0) {
-                container.innerHTML = "<p class='text-center text-xs text-slate-400 py-6'>Henüz bir işlemin bulunmuyor.</p>";
+            if (userOrders.length === 0) {
+                listEl.innerHTML = '<div class="text-slate-400 text-center py-6 text-xs">Henüz bir siparişiniz yok.</div>';
                 return;
             }
 
-            container.innerHTML = "";
-            userOrders.forEach(o => {
-                container.innerHTML += `
-                    <div class="bg-slate-800 p-3.5 rounded-xl border border-slate-700/40 space-y-2">
-                        <div class="flex justify-between items-center">
-                            <h3 class="font-bold text-xs text-white">${o.service}</h3>
-                            <span class="bg-amber-500/10 text-amber-400 text-[10px] px-2 py-0.5 rounded-md font-semibold">${o.status}</span>
+            listEl.innerHTML = userOrders.map(o => `
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex justify-between items-center text-xs">
+                    <div>
+                        <p class="text-white font-medium truncate max-w-[180px]">${o.link}</p>
+                        <span class="text-[10px] text-slate-400">Adet: ${o.count}</span>
+                    </div>
+                    <span class="bg-amber-500/10 text-amber-400 font-semibold px-2 py-1 rounded-lg text-[10px]">${o.status}</span>
+                </div>
+            `).join('');
+        }
+
+        // Bakiye Bildirimi
+        function submitDeposit() {
+            let tx = document.getElementById('depositTxId').value.trim();
+            let amount = document.getElementById('depositAmount').value.trim();
+
+            if (!tx || !amount) {
+                alert("Lütfen tüm alanları doldurun!");
+                return;
+            }
+
+            let db = getDB();
+            db.deposits.push({ user: currentUser, tx: tx, amount: amount, status: "Beklemede" });
+            saveDB(db);
+            alert("Yatırım bildiriminiz yöneticiye iletildi.");
+            document.getElementById('depositTxId').value = '';
+            document.getElementById('depositAmount').value = '';
+        }
+
+        // Destek Mesajlaşması
+        function sendSupportMessage() {
+            let msg = document.getElementById('supportInput').value.trim();
+            if (!msg) return;
+
+            let db = getDB();
+            db.support.push({ user: currentUser, message: msg, reply: null, id: Date.now() });
+            saveDB(db);
+            document.getElementById('supportInput').value = '';
+            renderSupportChat();
+        }
+
+        function renderSupportChat() {
+            let db = getDB();
+            let chatEl = document.getElementById('supportChatHistory');
+            let userSupports = db.support.filter(s => s.user === currentUser);
+
+            if (userSupports.length === 0) {
+                chatEl.innerHTML = '<div class="text-slate-400 text-center py-4">Destek geçmişiniz bulunmuyor.</div>';
+                return;
+            }
+
+            chatEl.innerHTML = userSupports.map(s => `
+                <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
+                    <p class="text-white font-medium">Siz: ${s.message}</p>
+                    ${s.reply ? `<p class="text-cyan-400 mt-1 font-semibold">Admin Yanıtı: ${s.reply}</p>` : `<p class="text-amber-400 mt-1 text-[10px]">Yanıt bekleniyor...</p>`}
+                </div>
+            `).join('');
+        }
+
+        function copyRefLink() {
+            let linkText = document.getElementById('refLinkText').innerText;
+            navigator.clipboard.writeText(linkText);
+            alert("Referans linki kopyalandı!");
+        }
+
+        // Admin Paneli Fonksiyonları
+        function openAdminModal() {
+            document.getElementById('adminModal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        function verifyAdminPin() {
+            let pin = document.getElementById('adminPinInput').value.trim();
+            if (pin === "1453" || pin === "1234") {
+                document.getElementById('adminLoginSection').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                loadAdminData();
+            } else {
+                alert("Hatalı Admin PIN!");
+            }
+        }
+
+        function loadAdminData() {
+            let db = getDB();
+            document.getElementById('adminStatUsers').innerText = Object.keys(db.users).length;
+            document.getElementById('adminStatOrders').innerText = db.orders.length;
+
+            // Kullanıcıları ve Banlama Paneli
+            let usersListEl = document.getElementById('adminUsersList');
+            usersListEl.innerHTML = Object.keys(db.users).map(uname => {
+                let u = db.users[uname];
+                return `
+                    <div class="bg-slate-800 p-2.5 rounded-xl flex items-center justify-between text-xs">
+                        <div>
+                            <span class="text-white font-bold">${uname}</span>
+                            <span class="text-cyan-400 ml-2">(${u.balance} Elmas)</span>
                         </div>
-                        <p class="text-[11px] text-slate-300 truncate">Detay: <span class="text-cyan-400">${o.target}</span></p>
-                        <div class="flex justify-between items-center text-[10px] text-slate-400 pt-1 border-t border-slate-700/50">
-                            <span>${o.cost > 0 ? 'Maliyet: ' + o.cost + ' 💎' : 'Ödeme Bildirimi'}</span>
-                            <span>${o.date}</span>
+                        <div class="flex space-x-1">
+                            <button onclick="adminAdjustBalance('${uname}')" class="bg-blue-600 px-2 py-1 rounded text-white font-bold">Bakiye</button>
+                            <button onclick="adminToggleBan('${uname}')" class="bg-${u.banned ? 'emerald' : 'red'}-600 px-2 py-1 rounded text-white font-bold">${u.banned ? 'Aktif Et' : 'Banla'}</button>
                         </div>
                     </div>
                 `;
-            });
-        }
+            }).join('');
 
-        function sendSupportTicket() {
-            const msgInput = document.getElementById('support-message');
-            const msg = msgInput.value.trim();
-            if(!msg) {
-                alert("Lütfen bir mesaj yazın!");
-                return;
-            }
-
-            let tickets = JSON.parse(localStorage.getItem('seko_support_tickets') || '[]');
-            tickets.unshift({
-                id: Date.now(),
-                user: currentUser,
-                message: msg,
-                date: new Date().toLocaleDateString('tr-TR') + " " + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
-                status: 'Cevap Bekliyor'
-            });
-            localStorage.setItem('seko_support_tickets', JSON.stringify(tickets));
-
-            alert("✅ Destek talebiniz Şehmus'a iletildi!");
-            msgInput.value = "";
-            renderSupport();
-        }
-
-        function renderSupport() {
-            const container = document.getElementById('support-history');
-            let tickets = JSON.parse(localStorage.getItem('seko_support_tickets') || '[]').filter(t => t.user === currentUser);
-            
-            if(tickets.length === 0) {
-                container.innerHTML = "";
-                return;
-            }
-
-            container.innerHTML = "<h3 class='text-xs font-bold text-slate-400 pt-2'>Geçmiş Taleplerim</h3>";
-            tickets.forEach(t => {
-                container.innerHTML += `
-                    <div class="bg-slate-800 p-3 rounded-xl border border-slate-700/40 text-xs space-y-1">
-                        <div class="flex justify-between text-[10px] text-slate-400">
-                            <span>Talep ID: #${t.id.toString().slice(-4)}</span>
-                            <span class="text-cyan-400">${t.status}</span>
-                        </div>
-                        <p class="text-slate-200">${t.message}</p>
-                        <p class="text-[9px] text-slate-500 text-right">${t.date}</p>
+            // Destek Talepleri Paneli
+            let supportListEl = document.getElementById('adminSupportList');
+            supportListEl.innerHTML = db.support.map((sup, index) => `
+                <div class="bg-slate-800 p-2.5 rounded-xl space-y-1 text-xs">
+                    <p class="text-cyan-400 font-bold">${sup.user}:</p>
+                    <p class="text-white">${sup.message}</p>
+                    <div class="flex space-x-1 mt-2">
+                        <input type="text" id="reply_${index}" placeholder="Yanıt yaz..." class="flex-1 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+                        <button onclick="adminReplySupport(${index})" class="bg-cyan-500 px-3 py-1 rounded text-white font-bold">Gönder</button>
                     </div>
-                `;
-            });
+                </div>
+            `).join('');
         }
 
-        function openAdminPanel() {
-            const pin = prompt("Admin Şifresini Girin:");
-            if(pin !== "1453" && pin !== "1234") {
-                if(pin !== null) alert("Yanlış şifre!");
-                return;
-            }
-            document.getElementById('admin-modal').classList.remove('hidden');
-            renderAdminData();
-        }
-
-        function closeAdminPanel() {
-            document.getElementById('admin-modal').classList.add('hidden');
-            renderOrders();
-            updateWalletUI();
-        }
-
-        function adminAddBalanceToUser() {
-            const targetUser = document.getElementById('admin-target-user').value.trim();
-            const addAmount = parseInt(document.getElementById('admin-target-diamonds').value);
-
-            if(!targetUser || isNaN(addAmount) || addAmount <= 0) {
-                alert("Lütfen geçerli bir kullanıcı adı ve elmas miktarı girin!");
-                return;
-            }
-
-            let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
-            let current = parseInt(balances[targetUser] !== undefined ? balances[targetUser] : 100);
-            balances[targetUser] = current + addAmount;
-            localStorage.setItem('seko_db_balances', JSON.stringify(balances));
-
-            alert(`✅ @${targetUser} kullanıcısının hesabına ${addAmount} elmas eklendi! Yeni bakiye: ${balances[targetUser]}`);
-            document.getElementById('admin-target-user').value = '';
-            document.getElementById('admin-target-diamonds').value = '';
-        }
-
-        function renderAdminData() {
-            const ordContainer = document.getElementById('admin-orders-container');
-            let allOrders = JSON.parse(localStorage.getItem('seko_global_orders') || '[]');
-            
-            if(allOrders.length === 0) {
-                ordContainer.innerHTML = "<p class='text-xs text-slate-500 text-center py-2'>Henüz sipariş yok.</p>";
-            } else {
-                ordContainer.innerHTML = "";
-                allOrders.forEach((o, index) => {
-                    ordContainer.innerHTML += `
-                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2 text-xs">
-                            <div class="flex justify-between items-center text-[10px]">
-                                <span class="text-cyan-400 font-bold">Kullanıcı: @${o.user}</span>
-                                <span class="text-amber-400">${o.status}</span>
-                            </div>
-                            <p class="font-bold text-white">${o.service}</p>
-                            <p class="text-slate-300 text-[11px]">Hedef/Detay: <span class="text-emerald-400">${o.target}</span></p>
-                            <div class="flex justify-between items-center pt-1 border-t border-slate-900">
-                                <span class="text-[10px] text-slate-500">${o.date}</span>
-                                <div class="space-x-1">
-                                    <button onclick="adminCompleteOrder(${index})" class="bg-emerald-600 hover:bg-emerald-500 text-[10px] px-2 py-1 rounded font-bold">Tamamla/Onayla</button>
-                                    <button onclick="adminDeleteOrder(${index})" class="bg-rose-600 hover:bg-rose-500 text-[10px] px-2 py-1 rounded">Sil</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-
-            const supContainer = document.getElementById('admin-support-container');
-            let tickets = JSON.parse(localStorage.getItem('seko_support_tickets') || '[]');
-            if(tickets.length === 0) {
-                supContainer.innerHTML = "<p class='text-xs text-slate-500 text-center py-2'>Destek talebi yok.</p>";
-            } else {
-                supContainer.innerHTML = "";
-                tickets.forEach((t, index) => {
-                    supContainer.innerHTML += `
-                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-xs space-y-1">
-                            <div class="flex justify-between text-[10px] text-slate-400">
-                                <span class="text-cyan-400 font-bold">@${t.user}</span>
-                                <span>${t.date}</span>
-                            </div>
-                            <p class="text-slate-200">${t.message}</p>
-                            <button onclick="adminResolveTicket(${index})" class="bg-cyan-600 hover:bg-cyan-500 text-[10px] px-2 py-0.5 rounded mt-1">Okundu / Çözüldü İşaretle</button>
-                        </div>
-                    `;
-                });
+        function adminAdjustBalance(username) {
+            let amount = prompt(`${username} için eklenecek/çıkarılacak elmas miktarı (Eksi girerek düşebilirsiniz):`);
+            if (amount !== null) {
+                let db = getDB();
+                db.users[username].balance += parseInt(amount);
+                saveDB(db);
+                loadAdminData();
+                if (username === currentUser) checkUserStatus();
             }
         }
 
-        function adminCompleteOrder(index) {
-            let allOrders = JSON.parse(localStorage.getItem('seko_global_orders') || '[]');
-            let order = allOrders[index];
-            
-            if(order.diamondReward) {
-                let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
-                let targetBal = parseInt(balances[order.user] || 100);
-                targetBal += order.diamondReward;
-                balances[order.user] = targetBal;
-                localStorage.setItem('seko_db_balances', JSON.stringify(balances));
-                order.status = '✅ Onaylandı & Elmaslar Yüklendi';
-            } else {
-                order.status = '✅ Tamamlandı / Gönderildi';
+        function adminToggleBan(username) {
+            let db = getDB();
+            db.users[username].banned = !db.users[username].banned;
+            saveDB(db);
+            loadAdminData();
+        }
+
+        function adminReplySupport(index) {
+            let replyText = document.getElementById(`reply_${index}`).value.trim();
+            if (!replyText) return;
+
+            let db = getDB();
+            db.support[index].reply = replyText;
+            saveDB(db);
+            loadAdminData();
+        }
+
+        // Gerçek zamanlı ortak veri dinleme (Sekmeler arası senkronizasyon için)
+        window.addEventListener('storage', () => {
+            if (currentUser) {
+                checkUserStatus();
             }
-
-            allOrders[index] = order;
-            localStorage.setItem('seko_global_orders', JSON.stringify(allOrders));
-            renderAdminData();
-            alert("İşlem onaylandı!");
-        }
-
-        function adminDeleteOrder(index) {
-            let allOrders = JSON.parse(localStorage.getItem('seko_global_orders') || '[]');
-            allOrders.splice(index, 1);
-            localStorage.setItem('seko_global_orders', JSON.stringify(allOrders));
-            renderAdminData();
-        }
-
-        function adminResolveTicket(index) {
-            let tickets = JSON.parse(localStorage.getItem('seko_support_tickets') || '[]');
-            tickets.splice(index, 1);
-            localStorage.setItem('seko_support_tickets', JSON.stringify(tickets));
-            renderAdminData();
-        }
-
-        function copyReferralLink() {
-            const copyText = document.getElementById("referral-link");
-            copyText.select();
-            navigator.clipboard.writeText(copyText.value);
-            alert("Davet linki kopyalandı!");
-        }
+        });
     </script>
 </body>
 </html>
