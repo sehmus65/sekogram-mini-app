@@ -45,20 +45,30 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Test için yeni kullanıcı adı (Her testte burayı değiştirebilirsin)
+        // Test için kullanıcı adı
         const userId = tg.initDataUnsafe?.user?.username || "sehmus_test2";
         document.getElementById("username").innerText = "@" + userId;
 
-        // Cüzdan Bakiyesini ve Kullanıcıyı Güncelle
+        // Cüzdan Bakiyesini Güncelle
         async function updateWallet() {
             try {
                 const res = await fetch(`${API_BASE}/users/register?user_id=${userId}`, { method: 'POST' });
                 const data = await res.json();
+                console.log("Cüzdan Yanıtı:", data); // Gelen veriyi konsolda göreceğiz
                 
-                if (data) {
-                    const diamonds = data.diamonds !== undefined ? data.diamonds : (data.user?.diamonds || 0);
-                    document.getElementById("user-diamonds").innerText = diamonds;
+                // Hangi formatta gelirse gelsin elması yakala
+                let diamonds = 0;
+                if (typeof data === 'number') {
+                    diamonds = data;
+                } else if (data.diamonds !== undefined) {
+                    diamonds = data.diamonds;
+                } else if (data.balance !== undefined) {
+                    diamonds = data.balance;
+                } else if (data.user && data.user.diamonds !== undefined) {
+                    diamonds = data.user.diamonds;
                 }
+
+                document.getElementById("user-diamonds").innerText = diamonds;
             } catch (err) {
                 console.error("Cüzdan güncelleme hatası:", err);
             }
@@ -100,11 +110,11 @@
             try {
                 const res = await fetch(`${API_BASE}/tasks/complete?user_id=${userId}&task_id=${taskId}`, { method: 'POST' });
                 const data = await res.json();
+                console.log("Görev Tamamlama Yanıtı:", data);
                 
                 if (res.ok) {
                     alert(data.message || "Tebrikler, ödül alındı!");
                     await updateWallet(); // Cüzdanı anında güncelle
-                    await fetchTasks();
                 } else {
                     alert(data.detail || "Bir hata oluştu veya görev zaten tamamlandı.");
                 }
