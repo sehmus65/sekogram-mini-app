@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SekoGram</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-between p-4">
+
+    <!-- Header / Profil -->
+    <div class="w-full max-w-md bg-slate-800 p-4 rounded-2xl shadow-lg flex items-center justify-between">
+        <div>
+            <h1 id="username" class="text-lg font-bold">Yükleniyor...</h1>
+            <p class="text-xs text-slate-400">SekoGram Cüzdanı</p>
+        </div>
+        <div class="flex items-center space-x-2 bg-slate-700 px-3 py-1.5 rounded-xl">
+            <span class="text-cyan-400 font-bold" id="user-diamonds">0</span>
+            <span class="text-sm">💎</span>
+        </div>
+    </div>
+
+    <!-- Görevler Listesi -->
+    <div class="w-full max-w-md my-4 flex-1 overflow-y-auto space-y-3">
+        <h2 class="text-md font-semibold text-slate-300">Kazan-Kazan Görevleri</h2>
+        <div id="tasks-container" class="space-y-2">
+            <!-- Dinamik görevler buraya gelecek -->
+        </div>
+    </div>
+
+    <!-- Alt Bilgi / Buton -->
+    <div class="w-full max-w-md">
+        <button onclick="fetchTasks()" class="w-full bg-indigo-600 hover:bg-indigo-500 font-semibold py-3 rounded-xl transition">
+            Görevleri Yenile
+        </button>
+    </div>
+
+    <script>
+        const API_BASE = "https://sekogram-backend.vercel.app/api";
+        
+        // Telegram WebApp verilerini al
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // Test için kullanıcı ID'si (Telegram'dan gelmezse yedek)
+        const userId = tg.initDataUnsafe?.user?.username || "sehmus.n1";
+        document.getElementById("username").innerText = "@" + userId;
+
+        // Kullanıcı Kaydı / Kontrolü
+        async function registerUser() {
+            try {
+                await fetch(`${API_BASE}/users/register?user_id=${userId}`, { method: 'POST' });
+            } catch (err) {
+                console.error("Kayıt hatası:", err);
+            }
+        }
+
+        // Görevleri Çek
+        async function fetchTasks() {
+            const container = document.getElementById("tasks-container");
+            container.innerHTML = "<p class='text-center text-slate-400'>Yükleniyor...</p>";
+
+            try {
+                const res = await fetch(`${API_BASE}/tasks`);
+                const data = await res.json();
+                
+                if (data.status === "success") {
+                    container.innerHTML = "";
+                    data.tasks.forEach(task => {
+                        container.innerHTML += `
+                            <div class="bg-slate-800 p-4 rounded-xl flex items-center justify-between">
+                                <div>
+                                    <h3 class="font-semibold text-sm">${task.title}</h3>
+                                    <p class="text-xs text-slate-400">${task.description}</p>
+                                    <span class="text-xs text-cyan-400 mt-1 inline-block">+${task.reward_diamonds} Elmas</span>
+                                </div>
+                                <button onclick="completeTask('${task.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-4 py-2 rounded-lg font-medium transition">
+                                    Tamamla
+                                </button>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (err) {
+                container.innerHTML = "<p class='text-center text-red-400'>Görevler yüklenemedi!</p>";
+            }
+        }
+
+        // Görevi Tamamlama
+        async function completeTask(taskId) {
+            try {
+                const res = await fetch(`${API_BASE}/tasks/complete?user_id=${userId}&task_id=${taskId}`, { method: 'POST' });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    alert(data.message || "Tebrikler, ödül alındı!");
+                } else {
+                    alert("Bir hata oluştu veya görev zaten tamamlandı.");
+                }
+            } catch (err) {
+                alert("Bağlantı hatası!");
+            }
+        }
+
+        // Sayfa açıldığında çalıştır
+        registerUser().then(fetchTasks);
+    </script>
+</body>
+</html>
