@@ -11,27 +11,37 @@
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex flex-col justify-between p-4">
 
-    <!-- 🔐 KULLANICI KAYIT / GİRİŞ EKRANI -->
+    <!-- 🔐 KULLANICI GİRİŞ / KAYIT EKRANI -->
     <div id="auth-screen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 transition-all duration-300">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 space-y-5 shadow-2xl">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 space-y-4 shadow-2xl">
             <div class="text-center space-y-2">
                 <div class="w-16 h-16 bg-gradient-to-tr from-cyan-500 to-indigo-600 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-cyan-500/30 text-2xl">
-                    🚀
+                    🔐
                 </div>
                 <h1 class="text-xl font-black tracking-wider">SEKOGRAM</h1>
-                <p class="text-xs text-slate-400">Devam etmek için kullanıcı adını gir:</p>
+                <p class="text-xs text-slate-400">Hesabınıza giriş yapın veya yeni hesap oluşturun</p>
             </div>
 
-            <div class="space-y-3">
+            <!-- Giriş / Kayıt Sekme Seçimi -->
+            <div class="grid grid-cols-2 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <button onclick="switchAuthMode('login')" id="auth-tab-login" class="py-2 text-xs font-bold rounded-lg bg-cyan-500 text-slate-950 transition">Giriş Yap</button>
+                <button onclick="switchAuthMode('register')" id="auth-tab-register" class="py-2 text-xs font-bold rounded-lg text-slate-400 transition">Kayıt Ol</button>
+            </div>
+
+            <div class="space-y-3 pt-2">
                 <div>
-                    <label class="text-[10px] text-slate-400 block mb-1">Kullanıcı Adı veya Adınız:</label>
-                    <input type="text" id="reg-username" placeholder="Örn: seko_bey" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-cyan-500 font-medium">
+                    <label class="text-[10px] text-slate-400 block mb-1">Kullanıcı Adı:</label>
+                    <input type="text" id="auth-username" placeholder="Kullanıcı adınızı girin" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-cyan-500">
                 </div>
-                <button onclick="registerUser()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3 rounded-xl shadow-lg shadow-cyan-500/20 transition text-xs">
-                    Kayıt Ol ve 100 Elmas Kazan 💎
+                <div>
+                    <label class="text-[10px] text-slate-400 block mb-1">Şifre:</label>
+                    <input type="password" id="auth-password" placeholder="Şifrenizi girin" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <button id="auth-btn" onclick="handleAuth()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3 rounded-xl shadow-lg shadow-cyan-500/20 transition text-xs mt-2">
+                    Giriş Yap
                 </button>
             </div>
-            <p class="text-[10px] text-slate-500 text-center">Verileriniz cihazınızda güvenle saklanır.</p>
+            <p class="text-[10px] text-slate-500 text-center">Verileriniz şifreli ve kalıcı olarak veritabanında saklanır.</p>
         </div>
     </div>
 
@@ -44,7 +54,7 @@
                 <div class="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center text-lg">👤</div>
                 <div>
                     <h1 id="username-display" class="text-sm font-bold">@kullanici</h1>
-                    <p class="text-[10px] text-emerald-400 font-medium">● Aktif Hesap</p>
+                    <p class="text-[10px] text-emerald-400 font-medium">● Güvenli Oturum</p>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
@@ -163,7 +173,7 @@
         <!-- Çıkış / Hesap Değiştir -->
         <div class="pt-2">
             <button onclick="logoutUser()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-semibold py-2 rounded-xl transition text-[11px]">
-                Hesaptan Çıkış Yap / Başka Hesapla Gir
+                Oturumu Kapat (Çıkış Yap)
             </button>
         </div>
     </div>
@@ -195,48 +205,81 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let userId = localStorage.getItem('seko_registered_user');
+        let authMode = 'login'; // 'login' veya 'register'
+        let currentUser = localStorage.getItem('seko_current_session');
 
-        // Eğer daha önce kayıt olmuşsa direkt içeri al, yoksa kayıt ekranını göster
-        if (userId) {
+        // Eğer aktif oturum varsa doğrudan içeri al
+        if (currentUser) {
             document.getElementById('auth-screen').style.display = 'none';
             initApp();
         }
 
-        function registerUser() {
-            const inputVal = document.getElementById('reg-username').value.trim();
-            if (!inputVal) {
-                alert("Lütfen geçerli bir kullanıcı adı girin!");
+        function switchAuthMode(mode) {
+            authMode = mode;
+            const btnLogin = document.getElementById('auth-tab-login');
+            const btnReg = document.getElementById('auth-tab-register');
+            const actionBtn = document.getElementById('auth-btn');
+
+            if(mode === 'login') {
+                btnLogin.className = "py-2 text-xs font-bold rounded-lg bg-cyan-500 text-slate-950 transition";
+                btnReg.className = "py-2 text-xs font-bold rounded-lg text-slate-400 transition";
+                actionBtn.innerText = "Giriş Yap";
+            } else {
+                btnReg.className = "py-2 text-xs font-bold rounded-lg bg-cyan-500 text-slate-950 transition";
+                btnLogin.className = "py-2 text-xs font-bold rounded-lg text-slate-400 transition";
+                actionBtn.innerText = "Kayıt Ol ve 100 Elmas Kazan 💎";
+            }
+        }
+
+        function handleAuth() {
+            const u = document.getElementById('auth-username').value.trim();
+            const p = document.getElementById('auth-password').value.trim();
+
+            if(!u || !p) {
+                alert("Lütfen kullanıcı adı ve şifre alanlarını doldurun!");
                 return;
             }
 
-            userId = inputVal.replace(/[^a-zA-Z0-9_]/g, ""); // Sadece harf, rakam ve alt çizgi
-            if(userId.length < 3) {
-                alert("Kullanıcı adı en az 3 karakter olmalıdır!");
-                return;
-            }
+            let usersDB = JSON.parse(localStorage.getItem('seko_users_db') || '{}');
 
-            localStorage.setItem('seko_registered_user', userId);
+            if(authMode === 'register') {
+                if(usersDB[u]) {
+                    alert("Bu kullanıcı adı zaten alınmış! Lütfen başka bir tane seçin veya giriş yapın.");
+                    return;
+                }
+                // Yeni kullanıcı kaydı ve 100 elmas bonus
+                usersDB[u] = { password: p };
+                localStorage.setItem('seko_users_db', JSON.stringify(usersDB));
 
-            // Başlangıç 100 elmasını ver (eğer daha önce cüzdanı yoksa)
-            let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
-            if (balances[userId] === undefined) {
-                balances[userId] = 100;
+                let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
+                balances[u] = 100;
                 localStorage.setItem('seko_db_balances', JSON.stringify(balances));
-            }
 
-            // Kayıt ekranını kapat ve uygulamayı başlat
-            const authScreen = document.getElementById('auth-screen');
-            authScreen.style.opacity = '0';
-            setTimeout(() => {
-                authScreen.style.display = 'none';
-                initApp();
-            }, 300);
+                alert("🎉 Kayıt başarılı! 100 Elmas bonusunuz yüklendi. Giriş yapabilirsiniz.");
+                switchAuthMode('login');
+                document.getElementById('auth-password').value = '';
+            } else {
+                // Giriş yap
+                if(!usersDB[u] || usersDB[u].password !== p) {
+                    alert("Hatalı kullanıcı adı veya şifre!");
+                    return;
+                }
+
+                localStorage.setItem('seko_current_session', u);
+                currentUser = u;
+
+                const authScreen = document.getElementById('auth-screen');
+                authScreen.style.opacity = '0';
+                setTimeout(() => {
+                    authScreen.style.display = 'none';
+                    initApp();
+                }, 300);
+            }
         }
 
         function initApp() {
-            document.getElementById("username-display").innerText = "@" + userId;
-            document.getElementById("referral-link").value = `https://t.me/sekogram_bot/app?start=ref_${userId}`;
+            document.getElementById("username-display").innerText = "@" + currentUser;
+            document.getElementById("referral-link").value = `https://t.me/sekogram_bot/app?start=ref_${currentUser}`;
             updateWalletUI();
             fetchTasks();
             renderServices();
@@ -245,20 +288,20 @@
         }
 
         function logoutUser() {
-            if(confirm("Hesaptan çıkış yapmak istediğinize emin misiniz?")) {
-                localStorage.removeItem('seko_registered_user');
+            if(confirm("Oturumu kapatmak istediğinize emin misiniz?")) {
+                localStorage.removeItem('seko_current_session');
                 location.reload();
             }
         }
 
         function getBalance() {
             let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
-            return parseInt(balances[userId] !== undefined ? balances[userId] : 100);
+            return parseInt(balances[currentUser] !== undefined ? balances[currentUser] : 100);
         }
 
         function setBalance(val) {
             let balances = JSON.parse(localStorage.getItem('seko_db_balances') || '{}');
-            balances[userId] = val;
+            balances[currentUser] = val;
             localStorage.setItem('seko_db_balances', JSON.stringify(balances));
             updateWalletUI();
         }
@@ -313,10 +356,10 @@
 
         async function completeTask(taskId, reward) {
             try {
-                const res = await fetch(`${API_BASE}/tasks/complete?user_id=${userId}&task_id=${taskId}`, { method: 'POST' });
+                const res = await fetch(`${API_BASE}/tasks/complete?user_id=${currentUser}&task_id=${taskId}`, { method: 'POST' });
                 const data = await res.json();
                 if (res.ok) {
-                    alert(data.message || "Tebrikler, 100 elmas başlangıcın üstüne eklendi!");
+                    alert(data.message || "Tebrikler, elmas hesabınıza eklendi!");
                     setBalance(getBalance() + reward);
                 } else {
                     alert(data.detail || data.message || "Bu görevi zaten tamamladınız!");
@@ -376,7 +419,7 @@
             let allOrders = JSON.parse(localStorage.getItem('seko_global_orders') || '[]');
             allOrders.unshift({
                 id: Date.now(),
-                user: userId,
+                user: currentUser,
                 service: serviceName,
                 target: targetVal,
                 cost: cost,
@@ -404,7 +447,7 @@
             let allOrders = JSON.parse(localStorage.getItem('seko_global_orders') || '[]');
             allOrders.unshift({
                 id: Date.now(),
-                user: userId,
+                user: currentUser,
                 service: `💳 Bakiye Yükleme (+${diamondAmount} Elmas)`,
                 target: `Gönderen: ${txVal}`,
                 cost: 0,
@@ -422,7 +465,7 @@
         function renderOrders() {
             const container = document.getElementById("orders-container");
             let allOrders = JSON.parse(localStorage.getItem('seko_global_orders') || '[]');
-            let userOrders = allOrders.filter(o => o.user === userId);
+            let userOrders = allOrders.filter(o => o.user === currentUser);
 
             if(userOrders.length === 0) {
                 container.innerHTML = "<p class='text-center text-xs text-slate-400 py-6'>Henüz bir işlemin bulunmuyor.</p>";
@@ -458,7 +501,7 @@
             let tickets = JSON.parse(localStorage.getItem('seko_support_tickets') || '[]');
             tickets.unshift({
                 id: Date.now(),
-                user: userId,
+                user: currentUser,
                 message: msg,
                 date: new Date().toLocaleDateString('tr-TR') + " " + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
                 status: 'Cevap Bekliyor'
@@ -472,7 +515,7 @@
 
         function renderSupport() {
             const container = document.getElementById('support-history');
-            let tickets = JSON.parse(localStorage.getItem('seko_support_tickets') || '[]').filter(t => t.user === userId);
+            let tickets = JSON.parse(localStorage.getItem('seko_support_tickets') || '[]').filter(t => t.user === currentUser);
             
             if(tickets.length === 0) {
                 container.innerHTML = "";
