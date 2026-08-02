@@ -87,24 +87,25 @@
             <div class="space-y-3">
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700/50 space-y-3">
                     <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-sm text-cyan-300">Papara / IBAN ile Ödeme</h3>
+                        <h3 class="font-bold text-sm text-cyan-300">Banka Havalesi / EFT</h3>
                         <span class="bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-0.5 rounded-md font-semibold">Anında Onay</span>
                     </div>
-                    <p class="text-[11px] text-slate-400">Aşağıdaki hesaplara ödemeyi yaptıktan sonra bildirim gönderin, elmaslarınız cüzdanınıza eklensin.</p>
+                    <p class="text-[11px] text-slate-400">Aşağıdaki Ziraat Bankası hesabına ödemeyi yaptıktan sonra bildirim gönderin, elmaslarınız cüzdanınıza eklensin.</p>
                     
                     <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 space-y-1 text-xs">
-                        <p class="text-slate-300"><b>Papara No:</b> 1234 5678 90 (Şehmus A.)</p>
-                        <p class="text-slate-300"><b>IBAN:</b> TR33 0001 0000 1234 5678 9012 34</p>
+                        <p class="text-slate-300"><b>Banka:</b> Ziraat Bankası</p>
+                        <p class="text-slate-300"><b>Alıcı:</b> ŞEHMUS AYYILDIZ</p>
+                        <p class="text-slate-300"><b>IBAN:</b> <span class="text-cyan-400 font-mono">TR10 0001 0090 1013 1116 2050 01</span></p>
                     </div>
 
                     <div class="space-y-2 pt-1">
-                        <label class="text-[10px] text-slate-400 block">Yüklemek İstediğiniz Tutar (TL / Elmas Paket Seçin):</label>
+                        <label class="text-[10px] text-slate-400 block">Yüklemek İstediğiniz Tutar (Elmas Paket Seçin):</label>
                         <select id="deposit-package" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
                             <option value="500">50 TL = 500 Elmas</option>
                             <option value="1200">100 TL = 1,200 Elmas (Avantajlı!)</option>
                             <option value="3000">250 TL = 3,000 Elmas (Mega Paket!)</option>
                         </select>
-                        <input type="text" id="deposit-txid" placeholder="İşlem Dekont No veya Gönderen Adı Soyadı" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+                        <input type="text" id="deposit-txid" placeholder="Gönderen Adı Soyadı veya Açıklama" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
                         <button onclick="requestDeposit()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold py-2.5 rounded-lg transition">
                             Ödeme Bildirimi Gönder
                         </button>
@@ -337,15 +338,14 @@
             const txVal = txInput.value.trim();
 
             if(!txVal) {
-                alert("Lütfen ödeme yaptığınıza dair bir açıklama veya dekont no girin!");
+                alert("Lütfen ödeme yaptığınıza dair ad soyad veya açıklama girin!");
                 return;
             }
 
-            // Ödeme talebini siparişler listesine veya ayrı bir yere işleyelim ki sen görebilgesin
             let orders = JSON.parse(localStorage.getItem('seko_orders_' + userId) || '[]');
             orders.unshift({
                 service: `💳 Bakiye Yükleme (+${diamondAmount} Elmas)`,
-                target: `Dekont/İşlem: ${txVal}`,
+                target: `Gönderen: ${txVal}`,
                 cost: 0,
                 date: new Date().toLocaleDateString('tr-TR') + " " + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
                 status: 'Ödeme İnceleniyor (Onay Bekliyor)'
