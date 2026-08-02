@@ -31,9 +31,12 @@
         </div>
     </div>
 
-    <!-- Alt Bilgi / Buton -->
-    <div class="w-full max-w-md">
-        <button onclick="fetchTasks(); updateWallet();" class="w-full bg-indigo-600 hover:bg-indigo-500 font-semibold py-3 rounded-xl transition">
+    <!-- Alt Bilgi / Butonlar -->
+    <div class="w-full max-w-md space-y-2">
+        <button onclick="localStorage.clear(); location.reload();" class="w-full bg-rose-600 hover:bg-rose-500 font-semibold py-2.5 rounded-xl transition text-xs">
+            Yeni Test Kullanıcısı Oluştur (Reset)
+        </button>
+        <button onclick="fetchTasks();" class="w-full bg-indigo-600 hover:bg-indigo-500 font-semibold py-3 rounded-xl transition">
             Görevleri Yenile
         </button>
     </div>
@@ -45,33 +48,20 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Test için kullanıcı adı
-        const userId = tg.initDataUnsafe?.user?.username || "sehmus_test2";
+        // Kullanıcı ID yönetimi ve bakiye hafızası
+        let userId = localStorage.getItem('seko_random_user');
+        if (!userId) {
+            userId = "seko_" + Math.floor(Math.random() * 100000);
+            localStorage.setItem('seko_random_user', userId);
+            localStorage.setItem('seko_balance_' + userId, '0');
+        }
+        
         document.getElementById("username").innerText = "@" + userId;
 
-        // Cüzdan Bakiyesini Güncelle
-        async function updateWallet() {
-            try {
-                const res = await fetch(`${API_BASE}/users/register?user_id=${userId}`, { method: 'POST' });
-                const data = await res.json();
-                console.log("Cüzdan Yanıtı:", data); // Gelen veriyi konsolda göreceğiz
-                
-                // Hangi formatta gelirse gelsin elması yakala
-                let diamonds = 0;
-                if (typeof data === 'number') {
-                    diamonds = data;
-                } else if (data.diamonds !== undefined) {
-                    diamonds = data.diamonds;
-                } else if (data.balance !== undefined) {
-                    diamonds = data.balance;
-                } else if (data.user && data.user.diamonds !== undefined) {
-                    diamonds = data.user.diamonds;
-                }
-
-                document.getElementById("user-diamonds").innerText = diamonds;
-            } catch (err) {
-                console.error("Cüzdan güncelleme hatası:", err);
-            }
+        // Cüzdanı hafızadan ekrana yazdır
+        function updateWalletUI() {
+            const currentBalance = localStorage.getItem('seko_balance_' + userId) || '0';
+            document.getElementById("user-diamonds").innerText = currentBalance;
         }
 
         // Görevleri Çek
@@ -93,7 +83,7 @@
                                     <p class="text-xs text-slate-400">${task.description}</p>
                                     <span class="text-xs text-cyan-400 mt-1 inline-block">+${task.reward_diamonds} Elmas</span>
                                 </div>
-                                <button onclick="completeTask('${task.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-4 py-2 rounded-lg font-medium transition">
+                                <button onclick="completeTask('${task.id}', ${task.reward_diamonds})" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-4 py-2 rounded-lg font-medium transition">
                                     Tamamla
                                 </button>
                             </div>
@@ -105,18 +95,23 @@
             }
         }
 
-        // Görevi Tamamlama
-        async function completeTask(taskId) {
+        // Görevi Tamamlama ve Bakiyeyi Artırma
+        async function completeTask(taskId, reward) {
             try {
                 const res = await fetch(`${API_BASE}/tasks/complete?user_id=${userId}&task_id=${taskId}`, { method: 'POST' });
                 const data = await res.json();
-                console.log("Görev Tamamlama Yanıtı:", data);
                 
                 if (res.ok) {
                     alert(data.message || "Tebrikler, ödül alındı!");
-                    await updateWallet(); // Cüzdanı anında güncelle
+                    
+                    // Bakiyeyi güncelle ve hafızaya kaydet
+                    let currentBalance = parseInt(localStorage.getItem('seko_balance_' + userId) || '0');
+                    currentBalance += reward;
+                    localStorage.setItem('seko_balance_' + userId, currentBalance);
+                    
+                    updateWalletUI();
                 } else {
-                    alert(data.detail || "Bir hata oluştu veya görev zaten tamamlandı.");
+                    alert(data.detail || data.message || "Bu görevi zaten tamamladınız!!");
                 }
             } catch (err) {
                 alert("Bağlantı hatası!");
@@ -124,7 +119,8 @@
         }
 
         // Sayfa açıldığında çalıştır
-        updateWallet().then(fetchTasks);
+        updateWalletUI();
+        fetchTasks();
     </script>
 </body>
 </html>
